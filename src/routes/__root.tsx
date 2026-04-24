@@ -126,7 +126,7 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -147,7 +147,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         />
         <HeadContent />
       </head>
-      <body className="selection:bg-serenity selection:text-obsidian overflow-x-hidden">
+      <body className="selection:bg-serenity selection:text-obsidian overflow-x-hidden" suppressHydrationWarning>
         <ThemeProvider>
           <Header />
           <main>

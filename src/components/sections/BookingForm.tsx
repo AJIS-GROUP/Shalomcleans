@@ -168,13 +168,28 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
   if (isHero) return formContent
 
   return (
-    <section id="book" className="py-32 px-4 max-w-7xl mx-auto bg-transparent">
-      <SectionHeader 
-        eyebrow="Get Started"
-        title="Begin your"
-        titleItalic="transformation."
-        description="Ready to reclaim your time and peace? Our specialists are standing by to restore your home's tranquility."
-      />
+    <section id="book" className="relative pt-20 pb-40 px-4 overflow-hidden transition-colors duration-500">
+      {/* Cinematic Background Layer - Matched to Hero */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-obsidian">
+        <img 
+          src="/hero.png" 
+          alt="Cinematic Background" 
+          className="w-full h-full object-cover opacity-60 animate-[ken-burns_30s_infinite_alternate]" 
+        />
+        {/* Mirror Hero Gradients */}
+        <div className="absolute inset-0 bg-linear-to-r from-pristine dark:from-obsidian via-pristine/40 dark:via-obsidian/40 to-transparent transition-colors duration-500" />
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-pristine dark:to-obsidian transition-colors duration-500" />
+        {/* Softening overlay for the "Get Started" section specifically */}
+        <div className="absolute inset-0 bg-pristine/30 dark:bg-obsidian/30" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
+        <SectionHeader 
+          eyebrow="Get Started"
+          title="Begin your"
+          titleItalic="transformation."
+          description="Ready to reclaim your time and peace? Our specialists are standing by to restore your home's tranquility."
+        />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
         <div className="space-y-8 pt-12">
           <div className="space-y-4">
@@ -197,6 +212,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
         </div>
         {formContent}
       </div>
+     </div>
     </section>
   )
 }

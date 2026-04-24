@@ -71,7 +71,7 @@ export const FAQ = () => {
   ]
 
   return (
-    <section className="py-40 px-6 bg-transparent">
+    <section className="pt-40 pb-20 px-6 bg-transparent transition-colors duration-500">
       <div className="max-w-7xl mx-auto">
         <SectionHeader 
           eyebrow="Common Curiosities"
@@ -96,7 +96,7 @@ export const FAQ = () => {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-32 text-center"
+          className="mt-20 text-center"
         >
           <div className="inline-flex items-center gap-6 group cursor-pointer">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-obsidian/40 dark:text-white/40 group-hover:text-obsidian dark:group-hover:text-white transition-colors">Still have questions?</span>

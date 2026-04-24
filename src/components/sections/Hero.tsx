@@ -21,10 +21,20 @@ export const Hero = () => {
           <div className="flex items-center gap-4">
             <img src="/shalomcleans.png" alt="Shalom Logo" className="w-16 h-16 object-contain brightness-0 dark:invert transition-all duration-500" />
             <div className="h-10 w-px bg-obsidian/10 dark:bg-white/10" />
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/5 dark:bg-white/5 border border-obsidian/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-obsidian dark:text-white transition-colors duration-500">
+            
+            {/* Desktop Badge */}
+            <div className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/5 dark:bg-white/5 border border-obsidian/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-obsidian dark:text-white transition-colors duration-500">
               <Sparkles size={12} className="text-obsidian/60 dark:text-white/60" />
               The New Standard
             </div>
+
+            {/* Mobile Button */}
+            <a 
+              href="#book"
+              className="inline-flex md:hidden items-center gap-2 px-5 py-2.5 rounded-full bg-obsidian dark:bg-white text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-lg shadow-obsidian/20 dark:shadow-white/10 active:scale-95 transition-all duration-300"
+            >
+              Book Now
+            </a>
           </div>
 
           <h1 className="text-6xl md:text-8xl font-display font-medium tracking-tighter leading-[0.85] text-balance text-obsidian dark:text-white transition-colors duration-500">

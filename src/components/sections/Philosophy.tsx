@@ -9,14 +9,14 @@ const PillarCard = ({ icon: Icon, title, description, index }: { icon: any, titl
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ delay: index * 0.15, duration: 0.8, ease: [0.16, 1, 0.3, 1] as any }}
-    className="group"
+    className="group h-full"
   >
-    <div className="rounded-4xl bg-black/2 dark:bg-white/5 p-1.5 transition-all duration-700 hover:bg-obsidian/5 dark:hover:bg-white/10">
-      <div className="relative bg-white dark:bg-white/5 rounded-[1.625rem] p-10 md:p-12 overflow-hidden h-full transition-colors duration-500">
+    <div className="rounded-4xl bg-black/2 dark:bg-white/5 p-1.5 transition-all duration-700 hover:bg-obsidian/5 dark:hover:bg-white/10 h-full">
+      <div className="relative bg-white dark:bg-white/5 rounded-[1.625rem] p-10 md:p-12 overflow-hidden h-full transition-colors duration-500 flex flex-col">
         {/* Ambient glow */}
         <div className="absolute -bottom-12 -right-12 w-40 h-40 rounded-full bg-serenity/10 dark:bg-serenity/5 blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 space-y-8 flex-1">
           <div className="w-14 h-14 rounded-2xl bg-obsidian/5 dark:bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
             <Icon size={28} strokeWidth={1} className="text-obsidian dark:text-white transition-colors duration-500" />
           </div>
@@ -59,7 +59,7 @@ export const Philosophy = () => {
   ]
 
   return (
-    <section id="about" className="py-40 overflow-hidden">
+    <section id="about" className="pt-40 pb-20 overflow-hidden transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeader
           eyebrow="The Shalom Philosophy"
@@ -106,9 +106,9 @@ export const Philosophy = () => {
           </div>
         </motion.div>
 
-        {/* Decorative Line */}
-        <div className="flex justify-center pt-20">
-          <div className="w-px h-24 bg-linear-to-b from-obsidian/20 dark:from-white/20 to-transparent" />
+        {/* Decorative Line - Reduced spacing */}
+        <div className="flex justify-center pt-16">
+          <div className="w-px h-16 bg-linear-to-b from-obsidian/20 dark:from-white/20 to-transparent" />
         </div>
       </div>
     </section>

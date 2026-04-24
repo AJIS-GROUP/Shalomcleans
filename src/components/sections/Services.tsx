@@ -78,6 +78,7 @@ export const Services = () => {
       title: "Residential Bliss",
       description: "Our signature cleaning ritual for private sanctuaries. We restore order and serenity to every room.",
       icon: Home,
+      image: "/services/residential.png",
       span: "lg:col-span-8",
       color: "bg-serenity",
       delay: 0,
@@ -86,6 +87,7 @@ export const Services = () => {
       title: "Commercial Purity",
       description: "Workspace cleaning that prioritizes focus and professional clarity.",
       icon: Building2,
+      image: "/services/commercial.png",
       span: "lg:col-span-4",
       color: "bg-obsidian/5",
       delay: 0.1,
@@ -94,6 +96,7 @@ export const Services = () => {
       title: "Transition Clean",
       description: "Move-in/out deep cleaning for a seamless new beginning.",
       icon: Move,
+      image: "/services/transition.png",
       span: "lg:col-span-4",
       color: "bg-obsidian/5",
       delay: 0.2,
@@ -102,6 +105,7 @@ export const Services = () => {
       title: "The Deep Ritual",
       description: "An intensive, multi-phase cleaning experience for total home rejuvenation.",
       icon: Sparkles,
+      image: "/services/deep.png",
       span: "lg:col-span-8",
       color: "bg-serenity",
       delay: 0.3,
@@ -158,10 +162,21 @@ export const Services = () => {
                 className="h-full border-obsidian/5 dark:border-white/10 overflow-hidden transition-all duration-700 group-hover:border-obsidian/20 dark:group-hover:border-white/30 group-hover:shadow-2xl relative"
                 innerClassName="flex flex-col justify-between p-10 h-full relative overflow-hidden transition-colors duration-500"
               >
-                {/* Animated background layer */}
+                {/* Image background layer */}
                 <div className="absolute inset-0 z-0">
+                  <img 
+                    src={service.image} 
+                    alt={service.title}
+                    className="w-full h-full object-cover opacity-[0.08] dark:opacity-[0.15] mix-blend-multiply dark:mix-blend-luminosity grayscale group-hover:scale-110 transition-transform duration-[2s] ease-out"
+                  />
+                  <div className="absolute inset-0 bg-linear-to-b from-white/10 dark:from-obsidian/20 to-transparent" />
+                </div>
+
+                {/* Animated background layer */}
+                <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
                   <BgComponent />
                 </div>
+
                 
                 <div className="flex justify-between items-start relative z-10">
                   <div className="w-14 h-14 rounded-2xl bg-white/90 dark:bg-obsidian/90 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-obsidian/5 dark:border-white/10 group-hover:scale-110 transition-transform duration-500">
