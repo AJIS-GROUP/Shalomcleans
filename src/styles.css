@@ -1,17 +1,104 @@
-
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-pristine: #ffffff;
+  --color-serenity: #f0f7ff;
+  --color-obsidian: #0a0a0b;
+  --color-soft-zinc: #f4f4f5;
+  
+  --font-display: "Outfit", sans-serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+
+  --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-haptic: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-html,
-body,
-#app {
-  min-height: 100%;
+@layer base {
+  * {
+    @apply border-obsidian/5 dark:border-white/10;
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #app {
+    min-height: 100dvh;
+    @apply bg-pristine text-obsidian antialiased selection:bg-serenity selection:text-obsidian;
+    transition: background-color 0.7s var(--ease-fluid), color 0.7s var(--ease-fluid), border-color 0.7s var(--ease-fluid);
+  }
+
+  html.dark,
+  html.dark body,
+  html.dark #app {
+    @apply bg-obsidian text-white;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply tracking-tight;
+  }
 }
 
-body {
-  margin: 0;
+@layer utilities {
+  .glass-pill {
+    @apply backdrop-blur-xl bg-white/70 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.04)];
+  }
+
+  :is(.dark) .glass-pill {
+    @apply bg-obsidian/70 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)];
+  }
+
+  .double-bezel {
+    @apply p-1.5 rounded-[2rem] bg-obsidian/5 ring-1 ring-obsidian/5;
+  }
+
+  :is(.dark) .double-bezel {
+    @apply bg-white/5 ring-white/5;
+  }
+
+  .double-bezel-inner {
+    @apply rounded-[calc(2rem-0.375rem)] bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)];
+  }
+
+  :is(.dark) .double-bezel-inner {
+    @apply bg-obsidian shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)];
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
 }
 
+/* Cinematic Entry Animations */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1) translate(0, 0);
+  }
+  to {
+    transform: scale(1.1) translate(-2%, -2%);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.8s var(--ease-fluid) forwards;
+}
