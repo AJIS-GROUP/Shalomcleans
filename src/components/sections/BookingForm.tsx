@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { submitBooking, bookingSchema } from "../../lib/actions"
 import { Button } from "../ui/Button"
 import { Card } from "../ui/Card"
@@ -15,6 +15,28 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
   const [selectedService, setSelectedService] = useState("Standard")
 
   const services = ["Standard", "Deep Clean", "Move-In/Out"]
+
+  useEffect(() => {
+    const applyPreselect = (value: string | null | undefined) => {
+      if (!value) return
+      if (services.includes(value)) setSelectedService(value)
+    }
+
+    try {
+      const stored = sessionStorage.getItem("shalom:preselectService")
+      if (stored) {
+        applyPreselect(stored)
+        sessionStorage.removeItem("shalom:preselectService")
+      }
+    } catch {}
+
+    const onPreselect = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail
+      applyPreselect(detail)
+    }
+    window.addEventListener("shalom:preselect", onPreselect)
+    return () => window.removeEventListener("shalom:preselect", onPreselect)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

@@ -1,5 +1,3 @@
-"use client"
-
 export const Footer = () => {
   return (
     <footer className="py-12 border-t border-obsidian/5 dark:border-white/10 bg-soft-zinc/20 dark:bg-white/5 transition-colors duration-500">
@@ -14,8 +12,7 @@ export const Footer = () => {
           © 2026 Shalom Cleans. Pristine Spaces, Peaceful Hearts.
         </div>
         <div className="flex items-center gap-6">
-          <a href="#" className="text-xs font-bold uppercase tracking-widest text-obsidian/60 dark:text-white/60 hover:text-obsidian dark:hover:text-white transition-colors">Instagram</a>
-          <a href="#" className="text-xs font-bold uppercase tracking-widest text-obsidian/60 dark:text-white/60 hover:text-obsidian dark:hover:text-white transition-colors">LinkedIn</a>
+          <a href="https://www.instagram.com/shalomcleans/" target="_blank" rel="noopener noreferrer" className="text-xs font-bold uppercase tracking-widest text-obsidian/60 dark:text-white/60 hover:text-obsidian dark:hover:text-white transition-colors">Instagram</a>
         </div>
       </div>
     </footer>

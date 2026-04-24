@@ -79,6 +79,7 @@ export const Services = () => {
       description: "Our signature cleaning ritual for private sanctuaries. We restore order and serenity to every room.",
       icon: Home,
       image: "/services/residential.png",
+      bookingService: "Standard",
       span: "lg:col-span-8",
       color: "bg-serenity",
       delay: 0,
@@ -88,6 +89,7 @@ export const Services = () => {
       description: "Workspace cleaning that prioritizes focus and professional clarity.",
       icon: Building2,
       image: "/services/commercial.png",
+      bookingService: "Standard",
       span: "lg:col-span-4",
       color: "bg-obsidian/5",
       delay: 0.1,
@@ -97,6 +99,7 @@ export const Services = () => {
       description: "Move-in/out deep cleaning for a seamless new beginning.",
       icon: Move,
       image: "/services/transition.png",
+      bookingService: "Move-In/Out",
       span: "lg:col-span-4",
       color: "bg-obsidian/5",
       delay: 0.2,
@@ -106,11 +109,25 @@ export const Services = () => {
       description: "An intensive, multi-phase cleaning experience for total home rejuvenation.",
       icon: Sparkles,
       image: "/services/deep.png",
+      bookingService: "Deep Clean",
       span: "lg:col-span-8",
       color: "bg-serenity",
       delay: 0.3,
     },
   ]
+
+  const selectAndScroll = (service: string) => {
+    try {
+      sessionStorage.setItem("shalom:preselectService", service)
+    } catch {}
+    const target = document.getElementById("book")
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" })
+    } else {
+      window.location.hash = "#book"
+    }
+    window.dispatchEvent(new CustomEvent("shalom:preselect", { detail: service }))
+  }
 
   return (
     <section id="services" className="py-32 px-4 max-w-7xl mx-auto">
@@ -150,34 +167,38 @@ export const Services = () => {
         {services.map((service, i) => {
           const BgComponent = cardBackgrounds[i % cardBackgrounds.length]
           return (
-            <motion.div
+            <motion.button
               key={service.title}
+              type="button"
+              onClick={() => selectAndScroll(service.bookingService)}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: service.delay, duration: 0.8, ease: [0.16, 1, 0.3, 1] as any }}
-              className={`${service.span} group relative h-[450px]`}
+              className={`${service.span} group relative h-[450px] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-obsidian/40 dark:focus-visible:ring-white/40 focus-visible:ring-offset-4 focus-visible:ring-offset-pristine dark:focus-visible:ring-offset-obsidian rounded-[inherit]`}
+              aria-label={`Book ${service.title}`}
             >
-              <Card 
+              <Card
                 className="h-full border-obsidian/5 dark:border-white/10 overflow-hidden transition-all duration-700 group-hover:border-obsidian/20 dark:group-hover:border-white/30 group-hover:shadow-2xl relative"
                 innerClassName="flex flex-col justify-between p-10 h-full relative overflow-hidden transition-colors duration-500"
               >
                 {/* Image background layer */}
                 <div className="absolute inset-0 z-0">
-                  <img 
-                    src={service.image} 
+                  <img
+                    src={service.image}
                     alt={service.title}
-                    className="w-full h-full object-cover opacity-[0.08] dark:opacity-[0.15] mix-blend-multiply dark:mix-blend-luminosity grayscale group-hover:scale-110 transition-transform duration-[2s] ease-out"
+                    className="w-full h-full object-cover opacity-30 dark:opacity-45 grayscale-[35%] saturate-[0.9] group-hover:opacity-45 dark:group-hover:opacity-60 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[2s] ease-out"
                   />
-                  <div className="absolute inset-0 bg-linear-to-b from-white/10 dark:from-obsidian/20 to-transparent" />
+                  {/* Readability wash: softer in the middle, stronger at top & bottom where text sits */}
+                  <div className="absolute inset-0 bg-linear-to-b from-white/55 via-white/10 to-white/75 dark:from-obsidian/60 dark:via-obsidian/10 dark:to-obsidian/75" />
                 </div>
 
                 {/* Animated background layer */}
-                <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+                <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
                   <BgComponent />
                 </div>
 
-                
+
                 <div className="flex justify-between items-start relative z-10">
                   <div className="w-14 h-14 rounded-2xl bg-white/90 dark:bg-obsidian/90 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-obsidian/5 dark:border-white/10 group-hover:scale-110 transition-transform duration-500">
                     <service.icon size={28} className="text-obsidian dark:text-white transition-colors duration-500" strokeWidth={1.5} />
@@ -189,7 +210,7 @@ export const Services = () => {
 
                 <div className="space-y-4 relative z-10">
                   <h3 className="text-3xl font-display font-semibold tracking-tight text-obsidian dark:text-white transition-colors duration-500">{service.title}</h3>
-                  <p className="text-obsidian/40 dark:text-white/40 text-lg leading-snug max-w-sm group-hover:text-obsidian/60 dark:group-hover:text-white/60 transition-colors duration-500">
+                  <p className="text-obsidian/60 dark:text-white/50 text-lg leading-snug max-w-sm group-hover:text-obsidian/80 dark:group-hover:text-white/70 transition-colors duration-500">
                     {service.description}
                   </p>
                   <div className="pt-6">
@@ -199,7 +220,7 @@ export const Services = () => {
                   </div>
                 </div>
               </Card>
-            </motion.div>
+            </motion.button>
           )
         })}
       </div>

@@ -9,6 +9,7 @@ export const Header = () => {
 
   const navLinks = [
     { label: 'Services', to: '/#services' },
+    { label: 'Gallery', to: '/#gallery' },
     { label: 'About', to: '/#about' },
     { label: 'Reviews', to: '/#reviews' },
     { label: 'Book Now', to: '/#book', primary: true },
