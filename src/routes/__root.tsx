@@ -17,31 +17,47 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Shalom Cleans | Pristine Spaces, Peaceful Hearts',
+        title: 'Shalom Cleans | Boutique Cleaning Rituals & Restoration',
       },
       {
         name: 'description',
-        content: 'Premium residential and commercial cleaning services in Atlanta. Experience the peace of a truly pristine home.',
+        content: 'Bespoke cleaning rituals for modern sanctuaries. We restore tranquility to your home through organic, precise, and restorative purification. The new standard in residential bliss.',
       },
       {
         property: 'og:title',
-        content: 'Shalom Cleans | Pristine Spaces, Peaceful Hearts',
+        content: 'Shalom Cleans | Boutique Cleaning Rituals & Restoration',
       },
       {
         property: 'og:description',
-        content: 'Premium residential and commercial cleaning services in Atlanta. Experience the peace of a truly pristine home.',
+        content: 'Experience the restorative power of a truly pristine home. Organic cleaning rituals tailored to your unique architectural rhythm.',
       },
       {
         property: 'og:image',
         content: '/preview.png',
       },
       {
+        property: 'og:type',
+        content: 'website',
+      },
+      {
         name: 'twitter:card',
         content: 'summary_large_image',
       },
       {
+        name: 'twitter:title',
+        content: 'Shalom Cleans | Boutique Cleaning Rituals & Restoration',
+      },
+      {
+        name: 'twitter:description',
+        content: 'Bespoke cleaning rituals for modern sanctuaries. Precision cleaning with a boutique approach.',
+      },
+      {
         name: 'twitter:image',
         content: '/preview.png',
+      },
+      {
+        name: 'keywords',
+        content: 'luxury cleaning, residential cleaning, boutique cleaning rituals, organic home restoration, shalom cleans, pristine homes',
       },
     ],
     links: [
