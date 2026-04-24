@@ -7,7 +7,7 @@ import { FAQ } from '../components/sections/FAQ'
 import { Philosophy } from '../components/sections/Philosophy'
 import { Footer } from '../components/layout/Footer'
 
-export const Route = createFileRoute('/' as any)({ component: Home })
+export const Route = createFileRoute('/')({ component: Home })
 
 function Home() {
   return (
