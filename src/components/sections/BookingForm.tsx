@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { submitBooking, bookingSchema } from "../../lib/actions"
 import { Button } from "../ui/Button"
 import { Card } from "../ui/Card"
-import { CheckCircle2, AlertCircle, Sparkles } from "lucide-react"
+import { CheckCircle2, AlertCircle } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 
 const inputBase = "w-full px-4 py-2.5 rounded-xl bg-soft-zinc dark:bg-white/10 border-transparent focus:bg-white dark:focus:bg-white/15 focus:ring-1 focus:ring-obsidian/10 dark:focus:ring-white/20 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/30"
@@ -45,6 +45,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
     const formData = new FormData(e.currentTarget)
     const rawData = {
       name: formData.get('name') as string,
+      email: formData.get('email') as string,
       phone: formData.get('phone') as string,
       zip: formData.get('zip') as string,
       service: selectedService,
@@ -125,14 +126,26 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className={labelBase}>Zip Code <span className="text-red-500">*</span></label>
-            <input 
-              name="zip"
-              className={`${inputBase} ${errors.zip ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
-              placeholder="30308"
-            />
-            {errors.zip && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.zip}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className={labelBase}>Email <span className="text-red-500">*</span></label>
+              <input
+                name="email"
+                type="email"
+                className={`${inputBase} ${errors.email ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
+                placeholder="you@example.com"
+              />
+              {errors.email && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.email}</p>}
+            </div>
+            <div className="space-y-1">
+              <label className={labelBase}>Zip Code <span className="text-red-500">*</span></label>
+              <input
+                name="zip"
+                className={`${inputBase} ${errors.zip ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
+                placeholder="30308"
+              />
+              {errors.zip && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.zip}</p>}
+            </div>
           </div>
 
           <div className="space-y-3">

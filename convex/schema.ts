@@ -13,6 +13,7 @@ export const leadStatus = v.union(
 export default defineSchema({
   leads: defineTable({
     name: v.string(),
+    email: v.string(),
     phone: v.string(),
     zip: v.string(),
     service: v.string(),
