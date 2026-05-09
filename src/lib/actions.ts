@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
+import { api } from "../../convex/_generated/api"
+import { convex } from "./convex"
 
 export const bookingSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -11,8 +13,6 @@ export const bookingSchema = z.object({
 export const submitBooking = createServerFn({ method: "POST" })
   .inputValidator(bookingSchema)
   .handler(async ({ data }) => {
-    console.log("Booking received:", data)
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    return { success: true, message: "Booking request received! We'll call you in 30 seconds." }
+    const leadId = await convex.mutation(api.leads.create, data)
+    return { success: true, leadId }
   })
