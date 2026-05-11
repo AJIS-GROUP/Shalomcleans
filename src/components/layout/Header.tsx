@@ -2,7 +2,6 @@
 import { Link } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { ThemeToggle } from '../ui/ThemeToggle'
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -38,12 +37,10 @@ export const Header = () => {
               {link.label}
             </Link>
           ))}
-          <ThemeToggle />
         </div>
 
         {/* Mobile Controls */}
         <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 text-obsidian dark:text-white hover:bg-obsidian/5 dark:hover:bg-white/10 rounded-full transition-colors"

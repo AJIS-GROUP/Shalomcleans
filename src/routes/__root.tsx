@@ -4,7 +4,6 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { X } from 'lucide-react'
 import appCss from '../styles.css?url'
 import { Header } from '../components/layout/Header'
-import { ThemeProvider } from '../lib/theme'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -126,33 +125,15 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" className="dark scroll-smooth" suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const theme = localStorage.getItem('shalom-theme');
-                  const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-                  if (theme === 'dark' || (!theme && supportDarkMode)) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
         <HeadContent />
       </head>
       <body className="selection:bg-serenity selection:text-obsidian overflow-x-hidden" suppressHydrationWarning>
-        <ThemeProvider>
-          <Header />
-          <main>
-            {children}
-          </main>
+        <Header />
+        <main>
+          {children}
+        </main>
 
         <TanStackDevtools
           config={{
@@ -166,7 +147,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           ]}
         />
         <Scripts />
-        </ThemeProvider>
       </body>
     </html>
   )
