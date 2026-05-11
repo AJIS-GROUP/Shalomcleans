@@ -1,11 +1,41 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
 import { internal } from "./_generated/api"
+import { authComponent, createAuth } from "./auth"
 
 const http = httpRouter()
 
-const MAKE_BK_WEBHOOK_URL = process.env.MAKE_BK_WEBHOOK_URL
+authComponent.registerRoutes(http, createAuth)
+
 const VAPI_SERVER_SECRET = process.env.VAPI_SERVER_SECRET
+
+const ALLOWED_BOOKING_KEYS = new Set([
+  "firstName",
+  "lastName",
+  "email",
+  "phone",
+  "address",
+  "city",
+  "state",
+  "zip",
+  "country",
+  "service",
+  "preferredDateTime",
+  "notes",
+])
+const MAX_STR = 500
+
+function sanitizeBookingArgs(raw: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const [k, v] of Object.entries(raw)) {
+    if (!ALLOWED_BOOKING_KEYS.has(k)) continue
+    if (typeof v !== "string") continue
+    const cleaned = v.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").slice(0, MAX_STR)
+    if (cleaned.length === 0) continue
+    out[k] = cleaned
+  }
+  return out
+}
 
 type VapiToolCall = {
   id: string
@@ -25,11 +55,13 @@ http.route({
   path: "/vapi",
   method: "POST",
   handler: httpAction(async (ctx, req) => {
-    if (VAPI_SERVER_SECRET) {
-      const provided = req.headers.get("x-vapi-secret")
-      if (provided !== VAPI_SERVER_SECRET) {
-        return new Response("forbidden", { status: 403 })
-      }
+    // Fail closed: refuse if no secret is configured.
+    if (!VAPI_SERVER_SECRET) {
+      return new Response("server misconfigured", { status: 503 })
+    }
+    const provided = req.headers.get("x-vapi-secret")
+    if (!provided || !timingSafeEqual(provided, VAPI_SERVER_SECRET)) {
+      return new Response("forbidden", { status: 403 })
     }
 
     const payload = (await req.json().catch(() => ({}))) as {
@@ -48,42 +80,32 @@ http.route({
           continue
         }
 
-        const args = (tc.function?.arguments ?? {}) as {
-          firstName?: string
-          lastName?: string
-          email?: string
-          phone?: string
-          address?: string
-          city?: string
-          state?: string
-          zip?: string
-          country?: string
-          service?: string
-          preferredDateTime?: string
-          notes?: string
-        }
-
-        const bkResult = await postToMake({
-          ...args,
-          country: args.country ?? "USA",
+        const rawArgs = (tc.function?.arguments ?? {}) as Record<string, unknown>
+        const safeArgs = sanitizeBookingArgs(rawArgs)
+        const bookingPayload = {
+          ...safeArgs,
+          country: safeArgs.country ?? "USA",
           source: "Vapi",
           callId,
+        }
+
+        await ctx.runMutation(internal.events.record, {
+          kind: "vapi_tool_call",
+          severity: "info",
+          message: "Vapi assistant invoked bookAppointment",
+          vapiCallId: callId,
+          data: { args: safeArgs },
         })
 
-        if (callId && bkResult.ok) {
-          await ctx.runMutation(internal.leads.patchByVapiCallId, {
-            vapiCallId: callId,
-            status: "booked",
-            bookingKoalaId: bkResult.bookingId,
-            notes: args.notes,
-          })
-        }
+        await ctx.scheduler.runAfter(0, internal.bookings.sendToMake, {
+          payload: bookingPayload,
+          vapiCallId: callId,
+        })
 
         results.push({
           toolCallId: tc.id,
-          result: bkResult.ok
-            ? `Booking received. Our team will confirm details shortly.`
-            : `Booking failed: ${bkResult.error}`,
+          result:
+            "Booking received. Our team will confirm the details with you shortly.",
         })
       }
 
@@ -91,12 +113,26 @@ http.route({
     }
 
     if (message.type === "end-of-call-report" && callId) {
-      const reason = message.endedReason ?? message.call?.endedReason ?? ""
+      const reason = (message.endedReason ?? message.call?.endedReason ?? "")
+        .toString()
+        .slice(0, 200)
       const status = mapEndReason(reason)
       await ctx.runMutation(internal.leads.patchByVapiCallId, {
         vapiCallId: callId,
         status,
-        notes: message.analysis?.summary,
+        notes: message.analysis?.summary?.toString().slice(0, 500),
+      })
+      await ctx.runMutation(internal.events.record, {
+        kind: "vapi_end_of_call",
+        severity:
+          status === "failed"
+            ? "error"
+            : status === "no_answer" || status === "declined"
+              ? "warn"
+              : "info",
+        message: `Call ended: ${reason || "unknown"}`,
+        vapiCallId: callId,
+        data: { reason, status, summary: message.analysis?.summary?.toString().slice(0, 500) },
       })
       return Response.json({ ok: true })
     }
@@ -104,33 +140,6 @@ http.route({
     return Response.json({ ok: true })
   }),
 })
-
-async function postToMake(
-  body: Record<string, unknown>,
-): Promise<{ ok: true; bookingId?: string } | { ok: false; error: string }> {
-  if (!MAKE_BK_WEBHOOK_URL) {
-    return { ok: false, error: "MAKE_BK_WEBHOOK_URL not set" }
-  }
-  try {
-    const res = await fetch(MAKE_BK_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-    if (!res.ok) return { ok: false, error: `Make returned ${res.status}` }
-    const text = await res.text()
-    let bookingId: string | undefined
-    try {
-      const json = JSON.parse(text) as { id?: string; bookingId?: string }
-      bookingId = json.bookingId ?? json.id
-    } catch {
-      // Make often returns "Accepted" as plain text — that's fine.
-    }
-    return { ok: true, bookingId }
-  } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) }
-  }
-}
 
 function mapEndReason(
   reason: string,
@@ -143,6 +152,15 @@ function mapEndReason(
   if (r.includes("declined") || r.includes("rejected")) return "declined"
   if (r.includes("error") || r.includes("failed")) return "failed"
   return "calling"
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return diff === 0
 }
 
 export default http

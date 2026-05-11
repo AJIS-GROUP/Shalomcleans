@@ -1,4 +1,4 @@
-import { HeadContent, Link, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Link, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { X } from 'lucide-react'
@@ -124,13 +124,15 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const isAdmin = pathname.startsWith('/admin')
   return (
     <html lang="en" className="dark scroll-smooth" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body className="selection:bg-serenity selection:text-obsidian overflow-x-hidden" suppressHydrationWarning>
-        <Header />
+        {!isAdmin && <Header />}
         <main>
           {children}
         </main>

@@ -21,8 +21,28 @@ export default defineSchema({
     vapiCallId: v.optional(v.string()),
     bookingKoalaId: v.optional(v.string()),
     notes: v.optional(v.string()),
+    pendingBookingPayload: v.optional(v.any()),
+    pendingAttempts: v.optional(v.number()),
   })
     .index("by_phone", ["phone"])
     .index("by_status", ["status"])
-    .index("by_vapi_call", ["vapiCallId"]),
+    .index("by_vapi_call", ["vapiCallId"])
+    .index("by_pending_attempts", ["pendingAttempts"]),
+
+  events: defineTable({
+    kind: v.string(),
+    severity: v.union(
+      v.literal("info"),
+      v.literal("warn"),
+      v.literal("error"),
+      v.literal("success"),
+    ),
+    message: v.string(),
+    leadId: v.optional(v.id("leads")),
+    vapiCallId: v.optional(v.string()),
+    data: v.optional(v.any()),
+  })
+    .index("by_kind", ["kind"])
+    .index("by_severity", ["severity"])
+    .index("by_lead", ["leadId"]),
 })

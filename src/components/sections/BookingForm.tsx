@@ -116,13 +116,19 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
             </div>
             <div className="space-y-1">
               <label className={labelBase}>Phone <span className="text-red-500">*</span></label>
-              <input 
+              <input
                 name="phone"
                 type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
                 className={`${inputBase} ${errors.phone ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
                 placeholder="(404) 555-1234"
               />
-              {errors.phone && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.phone}</p>}
+              {errors.phone ? (
+                <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.phone}</p>
+              ) : (
+                <p className="text-[10px] text-obsidian/30 dark:text-white/30 ml-1">US numbers only · any format</p>
+              )}
             </div>
           </div>
 
