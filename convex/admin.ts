@@ -17,8 +17,6 @@ const MONTH_LABELS = [
   "Nov",
   "Dec",
 ]
-const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-
 function pctDelta(current: number, prior: number): number {
   if (prior === 0) return current === 0 ? 0 : 100
   return ((current - prior) / prior) * 100
@@ -64,11 +62,26 @@ export const overview = query({
   },
 })
 
+const optionalStatus = v.optional(
+  v.union(
+    v.literal("all"),
+    v.literal("pending"),
+    v.literal("calling"),
+    v.literal("booked"),
+    v.literal("declined"),
+    v.literal("no_answer"),
+    v.literal("failed"),
+  ),
+)
+
 export const leadsByMonth = query({
-  args: { months: v.optional(v.number()) },
-  handler: async (ctx, { months = 6 }) => {
+  args: { months: v.optional(v.number()), status: optionalStatus },
+  handler: async (ctx, { months = 6, status }) => {
     await requireAdmin(ctx)
-    const all = await ctx.db.query("leads").collect()
+    const rows = await ctx.db.query("leads").collect()
+    const all = status && status !== "all"
+      ? rows.filter((r) => r.status === status)
+      : rows
     const now = new Date()
     const buckets: Array<{
       label: string
@@ -96,39 +109,41 @@ export const leadsByMonth = query({
   },
 })
 
-export const callHeatmap = query({
-  args: {},
-  handler: async (ctx) => {
+// Returns raw lead timestamps so the client can bucket them in the viewer's
+// local timezone. Includes every lead (no vapiCallId filter) so the heatmap
+// always reflects real form activity.
+export const leadHeatmap = query({
+  args: { limit: v.optional(v.number()), status: optionalStatus },
+  handler: async (ctx, { limit = 500, status }) => {
     await requireAdmin(ctx)
-    const all = await ctx.db
-      .query("leads")
-      .filter((q) => q.neq(q.field("vapiCallId"), undefined))
-      .collect()
-    // 7 days × 7 hours (8am-2pm to mirror the screenshot)
-    const grid: Array<Array<number>> = Array.from({ length: 7 }, () =>
-      Array.from({ length: 7 }, () => 0),
-    )
-    for (const lead of all) {
-      const d = new Date(lead._creationTime)
-      const day = d.getDay() // 0..6
-      const hour = d.getHours()
-      if (hour >= 8 && hour <= 14) {
-        grid[day][hour - 8]++
-      }
+    let rows
+    if (status && status !== "all") {
+      rows = await ctx.db
+        .query("leads")
+        .withIndex("by_status", (q) => q.eq("status", status))
+        .order("desc")
+        .take(limit)
+    } else {
+      rows = await ctx.db.query("leads").order("desc").take(limit)
     }
-    return {
-      days: DAY_LABELS,
-      hours: ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm"],
-      grid,
-    }
+    return rows.map((l) => l._creationTime)
   },
 })
 
 export const recentLeads = query({
-  args: { limit: v.optional(v.number()) },
-  handler: async (ctx, { limit = 8 }) => {
+  args: { limit: v.optional(v.number()), status: optionalStatus },
+  handler: async (ctx, { limit = 8, status }) => {
     await requireAdmin(ctx)
-    const rows = await ctx.db.query("leads").order("desc").take(limit)
+    let rows
+    if (status && status !== "all") {
+      rows = await ctx.db
+        .query("leads")
+        .withIndex("by_status", (q) => q.eq("status", status))
+        .order("desc")
+        .take(limit)
+    } else {
+      rows = await ctx.db.query("leads").order("desc").take(limit)
+    }
     return rows.map((l) => ({
       _id: l._id,
       _creationTime: l._creationTime,

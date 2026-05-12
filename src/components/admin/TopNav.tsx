@@ -1,8 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import {
-  Search,
-  Bell,
   LayoutDashboard,
   Users,
   Phone,
@@ -72,12 +70,6 @@ export function TopNav() {
         </nav>
       </div>
       <div className="flex items-center gap-2">
-        <button className="w-9 h-9 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 inline-flex items-center justify-center text-white/70 transition-colors">
-          <Search size={14} />
-        </button>
-        <button className="w-9 h-9 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 inline-flex items-center justify-center text-white/70 transition-colors">
-          <Bell size={14} />
-        </button>
         <Link
           to="/admin/password"
           className="hidden sm:inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white border border-white/10 rounded-full px-3 py-2 transition-colors"

@@ -1,21 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useQuery } from "convex/react"
 import {
   Users,
   Phone,
   CalendarCheck,
-  ArrowUpRight,
-  ChevronDown,
-  Filter as FilterIcon,
-  Calendar,
-  Download,
-  MoreHorizontal,
-  Plus,
   TrendingUp,
   TrendingDown,
   Sparkles,
 } from "lucide-react"
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  CartesianGrid,
+} from "recharts"
 import { api } from "../../../convex/_generated/api"
 import { Reveal } from "#/components/admin/Reveal"
 
@@ -26,18 +29,14 @@ export const Route = createFileRoute("/admin/")({
 type LeadStatus = "all" | "pending" | "calling" | "booked" | "declined" | "no_answer" | "failed"
 
 function AdminDashboard() {
-  const overview = useQuery(api.admin.overview)
-  const byMonth = useQuery(api.admin.leadsByMonth, { months: 6 })
-  const heatmap = useQuery(api.admin.callHeatmap)
-  const recent = useQuery(api.admin.recentLeads, { limit: 8 })
-  const bestSvc = useQuery(api.admin.bestService)
-  const pending = useQuery(api.admin.pendingBookings)
-
   const [activeFilter, setActiveFilter] = useState<LeadStatus>("all")
 
-  const filteredRecent = recent?.filter(
-    (l) => activeFilter === "all" || l.status === activeFilter,
-  )
+  const overview = useQuery(api.admin.overview)
+  const byMonth = useQuery(api.admin.leadsByMonth, { months: 6, status: activeFilter })
+  const heatmapTimes = useQuery(api.admin.leadHeatmap, { limit: 500, status: activeFilter })
+  const recent = useQuery(api.admin.recentLeads, { limit: 8, status: activeFilter })
+  const bestSvc = useQuery(api.admin.bestService)
+  const pending = useQuery(api.admin.pendingBookings)
 
   return (
     <>
@@ -76,37 +75,22 @@ function AdminDashboard() {
       </div>
 
       <Reveal delay={0.2}>
-        <div className="mt-7 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="mt-7">
           <FilterTabs active={activeFilter} onChange={setActiveFilter} />
-          <div className="flex items-center gap-2">
-            <IconBtn><FilterIcon size={14} /></IconBtn>
-            <IconBtn><Calendar size={14} /></IconBtn>
-            <button className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 hover:bg-white/10 transition-colors">
-              <Download size={14} /> Download reports
-            </button>
-          </div>
         </div>
       </Reveal>
 
-      <div className="mt-5 grid grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr] gap-4">
-        <Reveal delay={0.25}><LeadsBarCard data={byMonth} /></Reveal>
-        <Reveal delay={0.3}><HeatmapCard data={heatmap} /></Reveal>
-        <Reveal delay={0.35}><RecentActivityCard recent={filteredRecent} /></Reveal>
+      <div className="mt-5 grid grid-cols-1 lg:grid-cols-[1.3fr_1fr_1fr] gap-4 items-stretch">
+        <Reveal delay={0.25} className="h-full"><LeadsBarCard data={byMonth} /></Reveal>
+        <Reveal delay={0.3} className="h-full"><HeatmapCard times={heatmapTimes} /></Reveal>
+        <Reveal delay={0.35} className="h-full"><RecentActivityCard recent={recent} /></Reveal>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Reveal delay={0.4}><BestServiceCard data={bestSvc} /></Reveal>
-        <Reveal delay={0.45}><PendingDLQCard data={pending} /></Reveal>
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <Reveal delay={0.4} className="h-full"><BestServiceCard data={bestSvc} /></Reveal>
+        <Reveal delay={0.45} className="h-full"><PendingDLQCard data={pending} /></Reveal>
       </div>
     </>
-  )
-}
-
-function IconBtn({ children }: { children: React.ReactNode }) {
-  return (
-    <button className="w-9 h-9 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 inline-flex items-center justify-center text-white/70 transition-colors">
-      {children}
-    </button>
   )
 }
 
@@ -150,16 +134,11 @@ function KpiCard({
           : "bg-[#101012] text-white border-white/5"
       }`}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs opacity-80">
-          <div className={`w-7 h-7 rounded-full ${accent ? "bg-black/10" : "bg-white/5"} flex items-center justify-center`}>
-            {icon}
-          </div>
-          {label}
+      <div className="flex items-center gap-2 text-xs opacity-80">
+        <div className={`w-7 h-7 rounded-full ${accent ? "bg-black/10" : "bg-white/5"} flex items-center justify-center`}>
+          {icon}
         </div>
-        <button className={`w-7 h-7 rounded-full ${accent ? "bg-black/10 hover:bg-black/20" : "bg-white/5 hover:bg-white/10"} inline-flex items-center justify-center`}>
-          <ArrowUpRight size={12} />
-        </button>
+        {label}
       </div>
       <div className="mt-5 text-3xl font-display">
         {typeof value === "number" ? value.toLocaleString() : value}
@@ -215,14 +194,18 @@ function LeadsBarCard({
   data: Array<{ label: string; count: number }> | undefined
 }) {
   const months = data ?? []
-  const max = Math.max(1, ...months.map((m) => m.count))
   const peakIdx = months.reduce(
     (best, m, i) => (m.count > (months[best]?.count ?? 0) ? i : best),
     0,
   )
+  const chartData = months.map((m, i) => ({
+    name: m.label,
+    count: m.count,
+    isPeak: i === peakIdx && m.count > 0,
+  }))
 
   return (
-    <div className="rounded-3xl bg-[#101012] border border-white/5 p-5">
+    <div className="h-full flex flex-col rounded-3xl bg-[#101012] border border-white/5 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">
           <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center">
@@ -230,104 +213,163 @@ function LeadsBarCard({
           </div>
           Leads per month
         </div>
-        <div className="flex items-center gap-1 text-xs">
-          <button className="rounded-full px-3 py-1.5 text-white/60 hover:bg-white/5">Monthly</button>
-          <button className="rounded-full bg-[#c4f54a] text-black font-medium px-3 py-1.5">6mo</button>
-          <button className="w-7 h-7 rounded-full hover:bg-white/5 inline-flex items-center justify-center text-white/40">
-            <MoreHorizontal size={14} />
-          </button>
-        </div>
+        <span className="text-[10px] text-white/40">last 6 months</span>
       </div>
 
-      <div className="mt-6 h-56 flex items-end gap-3 sm:gap-4 px-1">
-        {months.map((m, i) => {
-          const h = (m.count / max) * 100
-          const isPeak = i === peakIdx && m.count > 0
-          return (
-            <div key={m.label} className="flex-1 flex flex-col items-center gap-2">
-              <div className="relative w-full flex-1 flex items-end">
-                {isPeak && (
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 text-center">
-                    <div className="inline-block bg-purple-500 text-white text-[10px] rounded-full px-2 py-0.5 mb-1">
-                      Peak
-                    </div>
-                    <div className="text-[10px] text-white/50">{m.count} leads</div>
-                  </div>
-                )}
-                <div
-                  className={`w-full rounded-t-xl ${
-                    isPeak
-                      ? "bg-purple-500"
-                      : "bg-[#1f1f22] [background-image:repeating-linear-gradient(135deg,rgba(255,255,255,0.04)_0,rgba(255,255,255,0.04)_2px,transparent_2px,transparent_6px)] border-2 border-dashed border-white/10"
-                  }`}
-                  style={{ height: `${Math.max(h, 6)}%` }}
+      <div className="mt-6 flex-1 min-h-[240px] -ml-3 relative">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={200} debounce={50}>
+          <BarChart data={chartData} margin={{ top: 18, right: 6, left: 0, bottom: 0 }}>
+            <defs>
+              <pattern id="leadStripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(135)">
+                <rect width="6" height="6" fill="#1f1f22" />
+                <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
+              </pattern>
+            </defs>
+            <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
+            <XAxis
+              dataKey="name"
+              tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }}
+              tickLine={false}
+              axisLine={false}
+              allowDecimals={false}
+              width={28}
+            />
+            <Tooltip
+              cursor={{ fill: "rgba(255,255,255,0.04)" }}
+              content={<BarTooltip />}
+            />
+            <Bar dataKey="count" radius={[10, 10, 4, 4]} maxBarSize={48}>
+              {chartData.map((d, i) => (
+                <Cell
+                  key={i}
+                  fill={d.isPeak ? "#a855f7" : "url(#leadStripes)"}
+                  stroke={d.isPeak ? "transparent" : "rgba(255,255,255,0.08)"}
+                  strokeWidth={d.isPeak ? 0 : 1}
+                  strokeDasharray={d.isPeak ? "0" : "3 3"}
                 />
-              </div>
-              <div className="text-[10px] text-white/40">{m.label}</div>
-            </div>
-          )
-        })}
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   )
 }
 
-function HeatmapCard({
-  data,
+function BarTooltip({
+  active,
+  payload,
+  label,
 }: {
-  data:
-    | { days: Array<string>; hours: Array<string>; grid: Array<Array<number>> }
-    | undefined
+  active?: boolean
+  payload?: Array<{ value?: number; payload?: { isPeak?: boolean } }>
+  label?: string
 }) {
-  const days = data?.days ?? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-  const hours = data?.hours ?? ["8a", "9a", "10a", "11a", "12p", "1p", "2p"]
-  const grid = data?.grid ?? Array.from({ length: 7 }, () => Array(7).fill(0))
-  const max = Math.max(1, ...grid.flat())
+  if (!active || !payload?.length) return null
+  const value = payload[0]?.value ?? 0
+  const isPeak = payload[0]?.payload?.isPeak
+  return (
+    <div className="rounded-2xl bg-purple-500 text-white px-3 py-2 shadow-lg shadow-purple-500/20 text-center">
+      {isPeak && (
+        <div className="inline-block bg-white/20 rounded-full px-2 py-0.5 text-[9px] font-medium mb-1">
+          Peak
+        </div>
+      )}
+      <div className="text-[10px] opacity-80">{label} {new Date().getFullYear()}</div>
+      <div className="text-lg font-display font-medium">{value.toLocaleString()}</div>
+      <div className="text-[9px] opacity-80">leads</div>
+    </div>
+  )
+}
 
-  const cellColor = (n: number) => {
-    if (n === 0) return "bg-white/5"
-    const ratio = n / max
-    if (ratio > 0.75) return "bg-[#c4f54a]"
-    if (ratio > 0.5) return "bg-[#c4f54a]/70"
-    if (ratio > 0.25) return "bg-[#c4f54a]/40"
-    return "bg-[#c4f54a]/20"
+const HEAT_HOURS = [6, 8, 10, 12, 14, 16, 18] // start of each 2h bucket
+const HEAT_HOUR_LABELS = ["6a", "8a", "10a", "12p", "2p", "4p", "6p"]
+const HEAT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+function HeatmapCard({ times }: { times: Array<number> | undefined }) {
+  const grid = useMemo(() => {
+    const g: Array<Array<number>> = Array.from({ length: 7 }, () =>
+      Array(HEAT_HOURS.length).fill(0),
+    )
+    if (!times) return g
+    for (const t of times) {
+      const d = new Date(t)
+      const day = d.getDay()
+      const hour = d.getHours()
+      let bucket = -1
+      for (let i = 0; i < HEAT_HOURS.length; i++) {
+        const next = HEAT_HOURS[i + 1] ?? HEAT_HOURS[i] + 2
+        if (hour >= HEAT_HOURS[i] && hour < next) {
+          bucket = i
+          break
+        }
+      }
+      if (bucket >= 0) g[day][bucket]++
+    }
+    return g
+  }, [times])
+
+  const total = grid.flat().reduce((a, b) => a + b, 0)
+
+  // Absolute opacity: 1 lead in a cell is intentionally faint; intensity
+  // grows linearly, hitting full brightness around 10 leads/cell. This means
+  // a single submission doesn't look "maxed out" just because it's the only
+  // data point.
+  const cellStyle = (n: number): React.CSSProperties => {
+    if (n === 0) return { backgroundColor: "rgba(255,255,255,0.04)" }
+    const opacity = Math.min(1, 0.22 + 0.09 * n)
+    return { backgroundColor: `rgba(196, 245, 74, ${opacity.toFixed(3)})` }
   }
 
   return (
-    <div className="rounded-3xl bg-[#101012] border border-white/5 p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm">
-          <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center">
-            <Phone size={14} className="text-white/70" />
+    <div className="h-full flex flex-col rounded-3xl bg-[#101012] border border-white/5 p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center">
+              <Phone size={14} className="text-white/70" />
+            </div>
+            When leads come in
           </div>
-          Calls heatmap
+          <div className="text-[10px] text-white/40 mt-1 ml-9">
+            Form submissions by day &amp; hour (your time)
+          </div>
         </div>
-        <button className="inline-flex items-center gap-1 rounded-full bg-white/5 px-3 py-1.5 text-xs text-white/70">
-          By day <ChevronDown size={12} />
-        </button>
+        <span className="text-xs text-white/40 whitespace-nowrap">{total} total</span>
       </div>
 
-      <div className="mt-6 flex gap-2">
-        <div className="flex flex-col justify-between py-1 text-[9px] text-white/40">
-          {hours.map((h) => (
-            <div key={h}>{h}</div>
-          ))}
-        </div>
-        <div className="flex-1 grid grid-cols-7 gap-1.5">
-          {days.map((_, dayIdx) =>
-            hours.map((_, hourIdx) => (
-              <div
-                key={`${dayIdx}-${hourIdx}`}
-                className={`aspect-square rounded ${cellColor(grid[dayIdx]?.[hourIdx] ?? 0)}`}
-                title={`${days[dayIdx]} ${hours[hourIdx]}: ${grid[dayIdx]?.[hourIdx] ?? 0}`}
-              />
-            )),
-          )}
-        </div>
-      </div>
-      <div className="mt-3 flex justify-between text-[10px] text-white/40 pl-7">
-        {days.map((d) => (
-          <div key={d}>{d}</div>
+      <div className="mt-6 grid grid-cols-[auto_repeat(7,1fr)] gap-1.5">
+        {[...HEAT_HOUR_LABELS]
+          .map((_, i) => HEAT_HOUR_LABELS.length - 1 - i)
+          .flatMap((hourIdx) => [
+            <div
+              key={`lab-${hourIdx}`}
+              className="text-[9px] text-white/40 flex items-center justify-end pr-1"
+            >
+              {HEAT_HOUR_LABELS[hourIdx]}
+            </div>,
+            ...HEAT_DAYS.map((_, dayIdx) => {
+              const n = grid[dayIdx]?.[hourIdx] ?? 0
+              return (
+                <div
+                  key={`${dayIdx}-${hourIdx}`}
+                  className="aspect-square rounded transition-colors duration-200"
+                  style={cellStyle(n)}
+                  title={`${HEAT_DAYS[dayIdx]} ${HEAT_HOUR_LABELS[hourIdx]}: ${n}`}
+                />
+              )
+            }),
+          ])}
+        <div />
+        {HEAT_DAYS.map((d) => (
+          <div key={d} className="text-center text-[10px] text-white/40 mt-1">
+            {d}
+          </div>
         ))}
       </div>
     </div>
@@ -347,7 +389,7 @@ function RecentActivityCard({
   }> | undefined
 }) {
   return (
-    <div className="rounded-3xl bg-[#101012] border border-white/5 p-5">
+    <div className="h-full flex flex-col rounded-3xl bg-[#101012] border border-white/5 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">
           <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center">
@@ -355,12 +397,9 @@ function RecentActivityCard({
           </div>
           Recent leads
         </div>
-        <button className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 inline-flex items-center justify-center">
-          <Plus size={14} className="text-white/70" />
-        </button>
       </div>
 
-      <div className="mt-4 space-y-3 max-h-72 overflow-y-auto pr-1">
+      <div className="mt-4 flex-1 min-h-0 space-y-3 overflow-y-auto pr-1">
         {recent === undefined && (
           <div className="text-xs text-white/30 py-6 text-center">Loading…</div>
         )}
@@ -398,7 +437,7 @@ function BestServiceCard({
   const max = Math.max(1, ...(data?.map((d) => d.total) ?? []))
 
   return (
-    <div className="rounded-3xl bg-[#101012] border border-white/5 p-5">
+    <div className="h-full flex flex-col rounded-3xl bg-[#101012] border border-white/5 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">
           <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center">
@@ -413,7 +452,7 @@ function BestServiceCard({
         )}
       </div>
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-5 flex-1 min-h-0 space-y-3 overflow-y-auto pr-1">
         {data === undefined && (
           <div className="text-xs text-white/30 py-3">Loading…</div>
         )}
@@ -460,7 +499,7 @@ function PendingDLQCard({
     | undefined
 }) {
   return (
-    <div className="rounded-3xl bg-[#101012] border border-white/5 p-5">
+    <div className="h-full flex flex-col rounded-3xl bg-[#101012] border border-white/5 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">
           <div className="w-7 h-7 rounded-full bg-amber-500/10 flex items-center justify-center">
@@ -473,7 +512,7 @@ function PendingDLQCard({
         </span>
       </div>
 
-      <div className="mt-4 space-y-3 max-h-56 overflow-y-auto pr-1">
+      <div className="mt-4 flex-1 min-h-0 space-y-3 overflow-y-auto pr-1">
         {data === undefined && (
           <div className="text-xs text-white/30 py-3">Loading…</div>
         )}

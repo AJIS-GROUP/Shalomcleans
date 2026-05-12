@@ -1,7 +1,24 @@
+import { useRef } from "react"
+import { useNavigate } from "@tanstack/react-router"
 import { Sparkles } from "lucide-react"
 import { BookingForm } from "./BookingForm"
 
 export const Hero = () => {
+  const navigate = useNavigate()
+  const clicks = useRef(0)
+  const lastClickAt = useRef(0)
+
+  const handleSecretClick = () => {
+    const now = Date.now()
+    if (now - lastClickAt.current > 800) clicks.current = 0
+    lastClickAt.current = now
+    clicks.current += 1
+    if (clicks.current >= 3) {
+      clicks.current = 0
+      navigate({ to: "/admin" })
+    }
+  }
+
   return (
     <section className="relative min-h-dvh flex items-center justify-center overflow-hidden px-4 py-30 md:py-20">
       {/* Background Image with Cinematic Overlay */}
@@ -22,11 +39,16 @@ export const Hero = () => {
             <img src="/shalomcleans.png" alt="Shalom Logo" className="w-16 h-16 object-contain brightness-0 dark:invert transition-all duration-500" />
             <div className="h-10 w-px bg-obsidian/10 dark:bg-white/10" />
             
-            {/* Desktop Badge */}
-            <div className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/5 dark:bg-white/5 border border-obsidian/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-obsidian dark:text-white transition-colors duration-500">
+            {/* Desktop Badge — secret admin trigger: 3 quick clicks */}
+            <button
+              type="button"
+              onClick={handleSecretClick}
+              aria-label="Shalom Cleans signature mark"
+              className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/5 dark:bg-white/5 border border-obsidian/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-obsidian dark:text-white transition-colors duration-500 cursor-default select-none"
+            >
               <Sparkles size={12} className="text-obsidian/60 dark:text-white/60" />
               The New Standard
-            </div>
+            </button>
 
             {/* Mobile Button */}
             <a 
