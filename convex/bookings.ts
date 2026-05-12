@@ -7,7 +7,6 @@ import {
 import { internal, components } from "./_generated/api"
 import { parsePhoneNumberFromString } from "libphonenumber-js/min"
 import { RateLimiter, MINUTE, HOUR, DAY } from "@convex-dev/rate-limiter"
-import { verifyUsAddress } from "./geocode"
 
 const MAKE_BK_WEBHOOK_URL = process.env.MAKE_BK_WEBHOOK_URL
 const MAKE_SHARED_SECRET = process.env.MAKE_SHARED_SECRET
@@ -105,37 +104,14 @@ export const submit = action({
       return { ok: false, error: "Too many requests for this email. Please try again later." }
     }
 
-    // 3) Verify the address. On hard validation errors (wrong country / zip
-    //    mismatch / no match) we refuse the submission. On geocoder outage we
-    //    accept the typed address so a Nominatim hiccup doesn't block real
-    //    customers — the failure is logged for follow-up.
-    const verify = await verifyUsAddress(trimmedAddress, trimmedZip)
-    let resolvedAddress = trimmedAddress
-    let resolvedCity: string | undefined
-    let resolvedState: string | undefined
-    if (verify.ok && verify.verified) {
-      resolvedAddress = verify.address
-      resolvedCity = verify.city
-      resolvedState = verify.state
-    } else if (verify.ok && !verify.verified) {
-      return { ok: false, error: verify.reason }
-    } else {
-      await ctx.runMutation(internal.events.record, {
-        kind: "make_dispatch_failed",
-        severity: "warn",
-        message: `Address verifier unavailable: ${verify.error}`,
-      })
-    }
-
-    // 4) Insert lead (internal mutation)
+    // 3) Insert lead (internal mutation). Address is trusted as typed — the
+    //    Vapi agent confirms it on the call.
     const leadId = await ctx.runMutation(internal.leads.createInternal, {
       name: trimmedName,
       email: trimmedEmail,
       phone: e164,
       zip: trimmedZip,
-      address: resolvedAddress,
-      city: resolvedCity,
-      state: resolvedState,
+      address: trimmedAddress,
       service: trimmedService,
     })
 
@@ -148,9 +124,7 @@ export const submit = action({
           email: trimmedEmail,
           phone: e164,
           service: trimmedService,
-          address: resolvedAddress,
-          city: resolvedCity,
-          state: resolvedState,
+          address: trimmedAddress,
           zip: trimmedZip,
         },
         metadata: { leadId },
@@ -287,6 +261,10 @@ async function startOutboundCall(input: {
         metadata: input.metadata,
         firstMessage: buildFirstMessage(input.customer),
         model: {
+          // Vapi requires `provider` + `model` whenever the model object is
+          // overridden — even if we only want to swap the system message.
+          provider: process.env.VAPI_MODEL_PROVIDER ?? "openai",
+          model: process.env.VAPI_MODEL_NAME ?? "gpt-4o-mini",
           messages: [
             { role: "system", content: buildSystemPrompt(input.customer) },
           ],
