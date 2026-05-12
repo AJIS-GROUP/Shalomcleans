@@ -7,16 +7,18 @@ import {
 import { internal, components } from "./_generated/api"
 import { parsePhoneNumberFromString } from "libphonenumber-js/min"
 import { RateLimiter, MINUTE, HOUR, DAY } from "@convex-dev/rate-limiter"
+import { verifyUsAddress } from "./geocode"
 
 const MAKE_BK_WEBHOOK_URL = process.env.MAKE_BK_WEBHOOK_URL
 const MAKE_SHARED_SECRET = process.env.MAKE_SHARED_SECRET
 const VAPI_API = "https://api.vapi.ai"
 
 const rateLimiter = new RateLimiter(components.rateLimiter, {
-  // Per phone number: max 5 submissions per day, burst up to 2 in quick succession.
-  bookingByPhone: { kind: "token bucket", rate: 5, period: DAY, capacity: 2 },
-  // Per email: max 10 per day, burst up to 3.
-  bookingByEmail: { kind: "token bucket", rate: 10, period: DAY, capacity: 3 },
+  // Per phone: ~8 / day, allow up to 4 in quick succession (returning customer
+  // booking multiple services). After a burst, refill is one every ~3 hours.
+  bookingByPhone: { kind: "token bucket", rate: 8, period: DAY, capacity: 4 },
+  // Per email: ~15 / day, burst of 5.
+  bookingByEmail: { kind: "token bucket", rate: 15, period: DAY, capacity: 5 },
   // Global guard: 60 submissions / minute across the whole deployment.
   bookingGlobal: { kind: "token bucket", rate: 60, period: MINUTE, capacity: 30 },
   // Generic fallback so the limit refills slowly.
@@ -34,6 +36,7 @@ const submitArgs = {
   email: v.string(),
   phone: v.string(),
   zip: v.string(),
+  address: v.string(),
   service: v.string(),
 }
 
@@ -44,7 +47,12 @@ export const submit = action({
     const trimmedName = args.name.trim().slice(0, 100)
     const trimmedEmail = args.email.trim().toLowerCase().slice(0, 200)
     const trimmedZip = args.zip.trim()
+    const trimmedAddress = args.address.trim().slice(0, 200)
     const trimmedService = args.service.trim()
+
+    if (trimmedAddress.length < 5) {
+      return { ok: false, error: "Please enter your street address" }
+    }
 
     if (trimmedName.length < 2) {
       return { ok: false, error: "Name must be at least 2 characters" }
@@ -97,22 +105,52 @@ export const submit = action({
       return { ok: false, error: "Too many requests for this email. Please try again later." }
     }
 
-    // 3) Insert lead (internal mutation)
+    // 3) Verify the address. On hard validation errors (wrong country / zip
+    //    mismatch / no match) we refuse the submission. On geocoder outage we
+    //    accept the typed address so a Nominatim hiccup doesn't block real
+    //    customers — the failure is logged for follow-up.
+    const verify = await verifyUsAddress(trimmedAddress, trimmedZip)
+    let resolvedAddress = trimmedAddress
+    let resolvedCity: string | undefined
+    let resolvedState: string | undefined
+    if (verify.ok && verify.verified) {
+      resolvedAddress = verify.address
+      resolvedCity = verify.city
+      resolvedState = verify.state
+    } else if (verify.ok && !verify.verified) {
+      return { ok: false, error: verify.reason }
+    } else {
+      await ctx.runMutation(internal.events.record, {
+        kind: "make_dispatch_failed",
+        severity: "warn",
+        message: `Address verifier unavailable: ${verify.error}`,
+      })
+    }
+
+    // 4) Insert lead (internal mutation)
     const leadId = await ctx.runMutation(internal.leads.createInternal, {
       name: trimmedName,
       email: trimmedEmail,
       phone: e164,
       zip: trimmedZip,
+      address: resolvedAddress,
+      city: resolvedCity,
+      state: resolvedState,
       service: trimmedService,
     })
 
-    // 4) Kick off outbound Vapi call. Don't block the response on transient errors.
+    // 5) Kick off outbound Vapi call. Don't block the response on transient errors.
     try {
       const result = await startOutboundCall({
         phoneNumber: e164,
-        variables: {
+        customer: {
           name: trimmedName,
+          email: trimmedEmail,
+          phone: e164,
           service: trimmedService,
+          address: resolvedAddress,
+          city: resolvedCity,
+          state: resolvedState,
           zip: trimmedZip,
         },
         metadata: { leadId },
@@ -146,9 +184,62 @@ export const submit = action({
 
 // ---------------------- Outbound Vapi helper ----------------------
 
+type CustomerInfo = {
+  name: string
+  email: string
+  phone: string
+  service: string
+  address: string
+  city?: string
+  state?: string
+  zip: string
+}
+
+function buildFirstMessage(c: CustomerInfo): string {
+  const first = c.name.split(/\s+/)[0] || "there"
+  return (
+    `Hi ${first}, this is Sarah from Shalom Cleans calling about your ${c.service} cleaning request. ` +
+    `Is this a good time to lock in the details?`
+  )
+}
+
+function buildSystemPrompt(c: CustomerInfo): string {
+  const locality = [c.city, c.state].filter(Boolean).join(", ")
+  const fullAddress = locality
+    ? `${c.address}, ${locality} ${c.zip}`
+    : `${c.address}, ${c.zip}`
+  return [
+    "You are Sarah, a warm and concise booking assistant for Shalom Cleans, a residential cleaning service in the United States.",
+    "",
+    "The customer just submitted a booking request on our website. You are returning the call to confirm the details and schedule the appointment.",
+    "",
+    "Customer info already on file (do NOT ask them to repeat these — confirm only):",
+    `- Name: ${c.name}`,
+    `- Phone: ${c.phone}`,
+    `- Email: ${c.email}`,
+    `- Service requested: ${c.service} cleaning`,
+    `- Address: ${fullAddress}`,
+    "",
+    "Your job:",
+    "1. Greet them by first name and confirm the service + address.",
+    "2. Ask for a preferred date and 2-hour time window.",
+    "3. Ask if there are any special instructions (pets, gate codes, problem areas).",
+    "4. Once date/time is agreed, call the `bookAppointment` tool with all collected fields:",
+    `   firstName, lastName, email, phone, address, city, state, zip, service, preferredDateTime, notes.`,
+    "   The address/contact fields above are already verified — pass them through verbatim.",
+    "5. Confirm the booking back to them and end the call warmly.",
+    "",
+    "Style:",
+    "- Speak naturally, no lists or bullet points out loud.",
+    "- One short question at a time.",
+    "- If they hesitate or need to check their schedule, offer to follow up by text/email and end politely.",
+    "- Never invent prices or guarantee a specific cleaner — say our team will confirm.",
+  ].join("\n")
+}
+
 async function startOutboundCall(input: {
   phoneNumber: string
-  variables: Record<string, string>
+  customer: CustomerInfo
   metadata?: Record<string, unknown>
 }): Promise<
   | { skipped: true; reason: string }
@@ -163,6 +254,10 @@ async function startOutboundCall(input: {
   if (!phoneNumberId) {
     return { skipped: true, reason: "VAPI_PHONE_NUMBER_ID not set" }
   }
+
+  const [firstName, ...rest] = input.customer.name.trim().split(/\s+/)
+  const lastName = rest.join(" ")
+
   const res = await fetch(`${VAPI_API}/call`, {
     method: "POST",
     headers: {
@@ -172,10 +267,30 @@ async function startOutboundCall(input: {
     body: JSON.stringify({
       assistantId,
       phoneNumberId,
-      customer: { number: input.phoneNumber },
+      customer: { number: input.phoneNumber, name: input.customer.name },
       assistantOverrides: {
-        variableValues: input.variables,
+        // Keep variable values too — if the dashboard prompt references {{name}}
+        // or {{service}}, those still resolve. Our hard-coded overrides below
+        // are the source of truth though.
+        variableValues: {
+          firstName,
+          lastName,
+          name: input.customer.name,
+          email: input.customer.email,
+          phone: input.customer.phone,
+          service: input.customer.service,
+          address: input.customer.address,
+          city: input.customer.city ?? "",
+          state: input.customer.state ?? "",
+          zip: input.customer.zip,
+        },
         metadata: input.metadata,
+        firstMessage: buildFirstMessage(input.customer),
+        model: {
+          messages: [
+            { role: "system", content: buildSystemPrompt(input.customer) },
+          ],
+        },
       },
     }),
   })

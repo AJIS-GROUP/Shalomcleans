@@ -48,6 +48,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
       zip: formData.get('zip') as string,
+      address: formData.get('address') as string,
       service: selectedService,
     }
     
@@ -66,7 +67,8 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
       await submitBooking({ data: result.data })
       setSubmitted(true)
     } catch (error) {
-      setErrors({ root: "Something went wrong. Please try again." })
+      const message = error instanceof Error ? error.message : String(error)
+      setErrors({ root: message || "Something went wrong. Please try again." })
     } finally {
       setIsPending(false)
     }
@@ -152,6 +154,23 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
               />
               {errors.zip && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.zip}</p>}
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className={labelBase}>Street Address <span className="text-red-500">*</span></label>
+            <input
+              name="address"
+              autoComplete="street-address"
+              className={`${inputBase} ${errors.address ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
+              placeholder="123 Peachtree St NW"
+            />
+            {errors.address ? (
+              <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.address}</p>
+            ) : (
+              <p className="text-[10px] text-obsidian/30 dark:text-white/30 ml-1">
+                We verify this against your ZIP to make sure we got it right.
+              </p>
+            )}
           </div>
 
           <div className="space-y-3">

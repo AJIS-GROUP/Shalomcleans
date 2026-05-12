@@ -24,6 +24,9 @@ export const createInternal = internalMutation({
     email: v.string(),
     phone: v.string(),
     zip: v.string(),
+    address: v.optional(v.string()),
+    city: v.optional(v.string()),
+    state: v.optional(v.string()),
     service: v.string(),
   },
   handler: async (ctx, args) => {

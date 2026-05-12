@@ -34,12 +34,10 @@ const config = defineConfig({
   plugins: [
     devtools(),
     nitro({
-      config: {
-        routeRules: {
-          '/**': { headers: securityHeaders },
-          '/admin/**': {
-            headers: { ...securityHeaders, 'Cache-Control': 'no-store, no-cache, must-revalidate' },
-          },
+      routeRules: {
+        '/**': { headers: securityHeaders },
+        '/admin/**': {
+          headers: { ...securityHeaders, 'Cache-Control': 'no-store, no-cache, must-revalidate' },
         },
       },
       rollupConfig: { external: [/^@sentry\//] },

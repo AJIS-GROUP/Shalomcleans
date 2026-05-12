@@ -14,6 +14,7 @@ import type * as bookings from "../bookings.js";
 import type * as calls from "../calls.js";
 import type * as crons from "../crons.js";
 import type * as events from "../events.js";
+import type * as geocode from "../geocode.js";
 import type * as http from "../http.js";
 import type * as leads from "../leads.js";
 import type * as seed from "../seed.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   calls: typeof calls;
   crons: typeof crons;
   events: typeof events;
+  geocode: typeof geocode;
   http: typeof http;
   leads: typeof leads;
   seed: typeof seed;
