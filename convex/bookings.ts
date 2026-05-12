@@ -12,16 +12,15 @@ const MAKE_BK_WEBHOOK_URL = process.env.MAKE_BK_WEBHOOK_URL
 const MAKE_SHARED_SECRET = process.env.MAKE_SHARED_SECRET
 const VAPI_API = "https://api.vapi.ai"
 
-const rateLimiter = new RateLimiter(components.rateLimiter, {
-  // Per phone: ~8 / day, allow up to 4 in quick succession (returning customer
-  // booking multiple services). After a burst, refill is one every ~3 hours.
-  bookingByPhone: { kind: "token bucket", rate: 8, period: DAY, capacity: 4 },
-  // Per email: ~15 / day, burst of 5.
-  bookingByEmail: { kind: "token bucket", rate: 15, period: DAY, capacity: 5 },
-  // Global guard: 60 submissions / minute across the whole deployment.
-  bookingGlobal: { kind: "token bucket", rate: 60, period: MINUTE, capacity: 30 },
+export const rateLimiter = new RateLimiter(components.rateLimiter, {
+  // Per phone: 50 / day, burst of 20.
+  bookingByPhone: { kind: "token bucket", rate: 50, period: DAY, capacity: 20 },
+  // Per email: 80 / day, burst of 25.
+  bookingByEmail: { kind: "token bucket", rate: 80, period: DAY, capacity: 25 },
+  // Global guard: 300 / minute across the whole deployment, burst of 150.
+  bookingGlobal: { kind: "token bucket", rate: 300, period: MINUTE, capacity: 150 },
   // Generic fallback so the limit refills slowly.
-  _hourly: { kind: "fixed window", rate: 1000, period: HOUR },
+  _hourly: { kind: "fixed window", rate: 5000, period: HOUR },
 })
 
 type DispatchResult =
