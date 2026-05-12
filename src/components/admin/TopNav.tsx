@@ -8,12 +8,19 @@ import {
   ScrollText,
   ChevronDown,
   LogOut,
+  Wrench,
 } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
 import { authClient } from "#/lib/auth-client"
 
 type NavItem = {
-  to: "/admin" | "/admin/leads" | "/admin/calls" | "/admin/bookings" | "/admin/logs"
+  to:
+    | "/admin"
+    | "/admin/leads"
+    | "/admin/calls"
+    | "/admin/bookings"
+    | "/admin/logs"
+    | "/admin/devtools"
   label: string
   icon: React.ReactNode
   badgeQuery?: "pendingBookings"
@@ -26,6 +33,7 @@ const ITEMS: Array<NavItem> = [
   { to: "/admin/calls", label: "Calls", icon: <Phone size={14} /> },
   { to: "/admin/bookings", label: "Bookings", icon: <CalendarCheck size={14} /> },
   { to: "/admin/logs", label: "Logs", icon: <ScrollText size={14} />, badgeQuery: "pendingBookings" },
+  { to: "/admin/devtools", label: "Dev tools", icon: <Wrench size={14} /> },
 ]
 
 export function TopNav() {
