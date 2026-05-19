@@ -1,5 +1,5 @@
 import { useRef } from "react"
-import { useNavigate } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import { Sparkles } from "lucide-react"
 import { BookingForm } from "./BookingForm"
 
@@ -51,12 +51,12 @@ export const Hero = () => {
             </button>
 
             {/* Mobile Button */}
-            <a 
-              href="#book"
+            <Link
+              to="/book"
               className="inline-flex md:hidden items-center gap-2 px-5 py-2.5 rounded-full bg-obsidian dark:bg-white text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-lg shadow-obsidian/20 dark:shadow-white/10 active:scale-95 transition-all duration-300"
             >
               Book Now
-            </a>
+            </Link>
           </div>
 
           <h1 className="text-6xl md:text-8xl font-display font-medium tracking-tighter leading-[0.85] text-balance text-obsidian dark:text-white transition-colors duration-500">

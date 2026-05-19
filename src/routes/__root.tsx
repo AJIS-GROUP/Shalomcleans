@@ -126,13 +126,14 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const isAdmin = pathname.startsWith('/admin')
+  const isFullBleedEmbed = pathname === '/book' || pathname === '/contact'
   return (
     <html lang="en" className="dark scroll-smooth" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body className="selection:bg-serenity selection:text-obsidian overflow-x-hidden" suppressHydrationWarning>
-        {!isAdmin && <Header />}
+        {!isAdmin && !isFullBleedEmbed && <Header />}
         <main>
           {children}
         </main>

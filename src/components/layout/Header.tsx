@@ -11,7 +11,8 @@ export const Header = () => {
     { label: 'Gallery', to: '/#gallery' },
     { label: 'About', to: '/#about' },
     { label: 'Reviews', to: '/#reviews' },
-    { label: 'Book Now', to: '/#book', primary: true },
+    { label: 'Contact', to: '/contact' },
+    { label: 'Book Now', to: '/book', primary: true },
   ]
 
   return (

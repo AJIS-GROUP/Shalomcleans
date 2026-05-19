@@ -1,5 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
+import { useNavigate } from "@tanstack/react-router"
 import { Card } from "../ui/Card"
 import { Home, Building2, Move, ShieldCheck, Sparkles, Clock, ArrowUpRight } from "lucide-react"
 
@@ -73,13 +74,14 @@ const DriftingDiamonds = () => (
 const cardBackgrounds = [FloatingOrbs, RotatingGrid, PulsingRings, DriftingDiamonds]
 
 export const Services = () => {
+  const navigate = useNavigate()
+
   const services = [
     {
       title: "Residential Bliss",
       description: "Our signature cleaning ritual for private sanctuaries. We restore order and serenity to every room.",
       icon: Home,
       image: "/services/residential.png",
-      bookingService: "Standard",
       span: "lg:col-span-8",
       color: "bg-serenity",
       delay: 0,
@@ -89,7 +91,6 @@ export const Services = () => {
       description: "Workspace cleaning that prioritizes focus and professional clarity.",
       icon: Building2,
       image: "/services/commercial.png",
-      bookingService: "Standard",
       span: "lg:col-span-4",
       color: "bg-obsidian/5",
       delay: 0.1,
@@ -99,7 +100,6 @@ export const Services = () => {
       description: "Move-in/out deep cleaning for a seamless new beginning.",
       icon: Move,
       image: "/services/transition.png",
-      bookingService: "Move-In/Out",
       span: "lg:col-span-4",
       color: "bg-obsidian/5",
       delay: 0.2,
@@ -109,25 +109,13 @@ export const Services = () => {
       description: "An intensive, multi-phase cleaning experience for total home rejuvenation.",
       icon: Sparkles,
       image: "/services/deep.png",
-      bookingService: "Deep Clean",
       span: "lg:col-span-8",
       color: "bg-serenity",
       delay: 0.3,
     },
   ]
 
-  const selectAndScroll = (service: string) => {
-    try {
-      sessionStorage.setItem("shalom:preselectService", service)
-    } catch {}
-    const target = document.getElementById("book")
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" })
-    } else {
-      window.location.hash = "#book"
-    }
-    window.dispatchEvent(new CustomEvent("shalom:preselect", { detail: service }))
-  }
+  const goBook = () => navigate({ to: "/book" })
 
   return (
     <section id="services" className="py-32 px-4 max-w-7xl mx-auto">
@@ -170,7 +158,7 @@ export const Services = () => {
             <motion.button
               key={service.title}
               type="button"
-              onClick={() => selectAndScroll(service.bookingService)}
+              onClick={goBook}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

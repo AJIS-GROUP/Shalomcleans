@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { Link } from "@tanstack/react-router"
 import { Plus, Minus, ArrowRight } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 
@@ -92,18 +93,25 @@ export const FAQ = () => {
           ))}
         </div>
         
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-20 text-center"
+          className="mt-20 flex flex-col sm:flex-row items-center justify-center gap-6"
         >
-          <div className="inline-flex items-center gap-6 group cursor-pointer">
+          <Link
+            to="/book"
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-obsidian dark:bg-white text-white dark:text-obsidian text-xs font-bold uppercase tracking-[0.2em] shadow-lg hover:scale-105 active:scale-95 transition-transform duration-300"
+          >
+            Book Now
+            <ArrowRight size={16} />
+          </Link>
+          <Link to="/contact" className="inline-flex items-center gap-4 group">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-obsidian/40 dark:text-white/40 group-hover:text-obsidian dark:group-hover:text-white transition-colors">Still have questions?</span>
             <div className="w-12 h-12 rounded-full border border-obsidian/5 dark:border-white/10 flex items-center justify-center group-hover:bg-obsidian dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-obsidian transition-all duration-700">
               <ArrowRight size={18} />
             </div>
-          </div>
+          </Link>
         </motion.div>
       </div>
     </section>
