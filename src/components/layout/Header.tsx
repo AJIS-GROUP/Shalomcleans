@@ -2,18 +2,35 @@
 import { Link } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import { BOOK_URL, CONTACT_URL } from '../../lib/booking-urls'
+
+type NavLink = {
+  label: string
+  to?: string
+  href?: string
+  primary?: boolean
+}
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const navLinks = [
+  const navLinks: NavLink[] = [
     { label: 'Services', to: '/#services' },
     { label: 'Gallery', to: '/#gallery' },
     { label: 'About', to: '/#about' },
     { label: 'Reviews', to: '/#reviews' },
-    { label: 'Contact', to: '/contact' },
-    { label: 'Book Now', to: '/book', primary: true },
+    { label: 'Contact', href: CONTACT_URL },
+    { label: 'Book Now', href: BOOK_URL, primary: true },
   ]
+
+  const desktopClass = (primary?: boolean) =>
+    `text-sm font-medium transition-all duration-300 ${primary
+      ? 'bg-obsidian dark:bg-white text-white dark:text-obsidian px-5 py-2 rounded-full hover:scale-105 active:scale-95 shadow-lg shadow-obsidian/10 dark:shadow-white/10'
+      : 'text-obsidian/60 dark:text-white/60 hover:text-obsidian dark:hover:text-white hover:-translate-y-px'
+    }`
+
+  const mobileClass = (i: number) =>
+    `text-3xl font-display font-medium text-obsidian dark:text-white transition-all duration-500 ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`
 
   return (
     <>
@@ -26,18 +43,27 @@ export const Header = () => {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              to={link.to}
-              className={`text-sm font-medium transition-all duration-300 ${link.primary
-                ? 'bg-obsidian dark:bg-white text-white dark:text-obsidian px-5 py-2 rounded-full hover:scale-105 active:scale-95 shadow-lg shadow-obsidian/10 dark:shadow-white/10'
-                : 'text-obsidian/60 dark:text-white/60 hover:text-obsidian dark:hover:text-white hover:-translate-y-px'
-                }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.href ? (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={desktopClass(link.primary)}
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.to!}
+                className={desktopClass(link.primary)}
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </div>
 
         {/* Mobile Controls */}
@@ -54,17 +80,31 @@ export const Header = () => {
       {/* Mobile Menu Overlay */}
       <div className={`fixed inset-0 z-40 bg-white/90 dark:bg-obsidian/90 backdrop-blur-2xl transition-all duration-700 ease-fluid md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex flex-col items-center justify-center h-full gap-8">
-          {navLinks.map((link, i) => (
-            <Link
-              key={link.label}
-              to={link.to}
-              onClick={() => setIsMenuOpen(false)}
-              className={`text-3xl font-display font-medium text-obsidian dark:text-white transition-all duration-500 ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
-              style={{ transitionDelay: `${i * 100}ms` }}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link, i) =>
+            link.href ? (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsMenuOpen(false)}
+                className={mobileClass(i)}
+                style={{ transitionDelay: `${i * 100}ms` }}
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.to!}
+                onClick={() => setIsMenuOpen(false)}
+                className={mobileClass(i)}
+                style={{ transitionDelay: `${i * 100}ms` }}
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </div>
       </div>
     </>

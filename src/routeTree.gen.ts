@@ -9,8 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as BookRouteImport } from './routes/book'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -23,16 +21,6 @@ import { Route as AdminCallsRouteImport } from './routes/admin/calls'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookRoute = BookRouteImport.update({
-  id: '/book',
-  path: '/book',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -92,8 +80,6 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/book': typeof BookRoute
-  '/contact': typeof ContactRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/calls': typeof AdminCallsRoute
   '/admin/devtools': typeof AdminDevtoolsRoute
@@ -106,8 +92,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/book': typeof BookRoute
-  '/contact': typeof ContactRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/calls': typeof AdminCallsRoute
   '/admin/devtools': typeof AdminDevtoolsRoute
@@ -122,8 +106,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/book': typeof BookRoute
-  '/contact': typeof ContactRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/calls': typeof AdminCallsRoute
   '/admin/devtools': typeof AdminDevtoolsRoute
@@ -139,8 +121,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/book'
-    | '/contact'
     | '/admin/bookings'
     | '/admin/calls'
     | '/admin/devtools'
@@ -153,8 +133,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/book'
-    | '/contact'
     | '/admin/bookings'
     | '/admin/calls'
     | '/admin/devtools'
@@ -168,8 +146,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
-    | '/book'
-    | '/contact'
     | '/admin/bookings'
     | '/admin/calls'
     | '/admin/devtools'
@@ -184,27 +160,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
-  BookRoute: typeof BookRoute
-  ContactRoute: typeof ContactRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/book': {
-      id: '/book'
-      path: '/book'
-      fullPath: '/book'
-      preLoaderRoute: typeof BookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -312,8 +272,6 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
-  BookRoute: BookRoute,
-  ContactRoute: ContactRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

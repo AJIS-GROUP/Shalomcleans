@@ -1,8 +1,8 @@
 "use client"
 import { motion } from "framer-motion"
-import { useNavigate } from "@tanstack/react-router"
 import { Card } from "../ui/Card"
 import { Home, Building2, Move, ShieldCheck, Sparkles, Clock, ArrowUpRight } from "lucide-react"
+import { BOOK_URL } from "../../lib/booking-urls"
 
 /* Isolated perpetual micro-animations — one per card variant */
 const FloatingOrbs = () => (
@@ -74,8 +74,6 @@ const DriftingDiamonds = () => (
 const cardBackgrounds = [FloatingOrbs, RotatingGrid, PulsingRings, DriftingDiamonds]
 
 export const Services = () => {
-  const navigate = useNavigate()
-
   const services = [
     {
       title: "Residential Bliss",
@@ -115,7 +113,7 @@ export const Services = () => {
     },
   ]
 
-  const goBook = () => navigate({ to: "/book" })
+  const goBook = () => window.open(BOOK_URL, "_blank", "noopener,noreferrer")
 
   return (
     <section id="services" className="py-32 px-4 max-w-7xl mx-auto">
