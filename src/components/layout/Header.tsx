@@ -29,7 +29,7 @@ export const Header = () => {
       : 'text-obsidian/60 dark:text-white/60 hover:text-obsidian dark:hover:text-white hover:-translate-y-px'
     }`
 
-  const mobileClass = (i: number) =>
+  const mobileClass = () =>
     `text-3xl font-display font-medium text-obsidian dark:text-white transition-all duration-500 ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`
 
   return (
@@ -88,7 +88,7 @@ export const Header = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsMenuOpen(false)}
-                className={mobileClass(i)}
+                className={mobileClass()}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 {link.label}
@@ -98,7 +98,7 @@ export const Header = () => {
                 key={link.label}
                 to={link.to!}
                 onClick={() => setIsMenuOpen(false)}
-                className={mobileClass(i)}
+                className={mobileClass()}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 {link.label}

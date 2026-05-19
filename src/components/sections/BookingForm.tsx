@@ -6,7 +6,8 @@ import { CheckCircle2, AlertCircle } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 
 const inputBase = "w-full px-4 py-2.5 rounded-xl bg-soft-zinc dark:bg-white/10 border-transparent focus:bg-white dark:focus:bg-white/15 focus:ring-1 focus:ring-obsidian/10 dark:focus:ring-white/20 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/30"
-const labelBase = "text-[10px] font-bold uppercase tracking-widest text-obsidian/40 dark:text-white/40 transition-colors duration-500"
+const inputHero = "w-full px-4 py-2.5 rounded-xl bg-white/90 dark:bg-white/[0.12] backdrop-blur-md border border-white/60 dark:border-white/15 focus:bg-white dark:focus:bg-white/[0.18] focus:border-obsidian/30 dark:focus:border-white/30 focus:ring-0 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/40"
+const labelBase = "text-[10px] font-bold uppercase tracking-widest text-obsidian/60 dark:text-white/55 transition-colors duration-500"
 
 export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
   const [submitted, setSubmitted] = useState(false)
@@ -15,11 +16,12 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
   const [selectedService, setSelectedService] = useState("Standard")
 
   const services = ["Standard", "Deep Clean", "Move-In/Out"]
+  const input = isHero ? inputHero : inputBase
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setErrors({})
-    
+
     const formData = new FormData(e.currentTarget)
     const rawData = {
       name: formData.get('name') as string,
@@ -29,7 +31,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
       address: formData.get('address') as string,
       service: selectedService,
     }
-    
+
     const result = bookingSchema.safeParse(rawData)
     if (!result.success) {
       const fieldErrors: Record<string, string> = {}
@@ -71,134 +73,152 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
     )
   }
 
-  const formContent = (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h3 className="text-2xl md:text-3xl font-display font-medium tracking-tight text-obsidian dark:text-white">
-          Request Your Free Quote
-        </h3>
-        <p className="text-[10px] font-bold tracking-[0.3em] text-obsidian/40 dark:text-white/40 uppercase">
-          30 Seconds · No Obligation
-        </p>
+  const heading = (
+    <div className="text-center space-y-1.5">
+      <h3 className="text-xl md:text-2xl font-display font-medium tracking-tight text-obsidian dark:text-white">
+        Request Your Free Quote
+      </h3>
+      <p className="text-[10px] font-bold tracking-[0.3em] text-obsidian/40 dark:text-white/40 uppercase">
+        30 Seconds · No Obligation
+      </p>
+    </div>
+  )
+
+  const formBody = (
+    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className={labelBase}>Full Name <span className="text-red-500">*</span></label>
+          <input
+            name="name"
+            className={`${input} ${errors.name ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
+            placeholder="John Smith"
+          />
+          {errors.name && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.name}</p>}
+        </div>
+        <div className="space-y-1">
+          <label className={labelBase}>Phone <span className="text-red-500">*</span></label>
+          <input
+            name="phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel-national"
+            className={`${input} ${errors.phone ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
+            placeholder="(404) 555-1234"
+          />
+          {errors.phone ? (
+            <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.phone}</p>
+          ) : (
+            <p className="text-[10px] text-obsidian/30 dark:text-white/30 ml-1">US numbers only · any format</p>
+          )}
+        </div>
       </div>
 
-      <Card className={isHero ? 'border-obsidian/10 shadow-2xl' : ''}>
-        <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className={labelBase}>Full Name <span className="text-red-500">*</span></label>
-              <input 
-                name="name"
-                className={`${inputBase} ${errors.name ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
-                placeholder="John Smith"
-              />
-              {errors.name && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.name}</p>}
-            </div>
-            <div className="space-y-1">
-              <label className={labelBase}>Phone <span className="text-red-500">*</span></label>
-              <input
-                name="phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel-national"
-                className={`${inputBase} ${errors.phone ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
-                placeholder="(404) 555-1234"
-              />
-              {errors.phone ? (
-                <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.phone}</p>
-              ) : (
-                <p className="text-[10px] text-obsidian/30 dark:text-white/30 ml-1">US numbers only · any format</p>
-              )}
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className={labelBase}>Email <span className="text-red-500">*</span></label>
+          <input
+            name="email"
+            type="email"
+            className={`${input} ${errors.email ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
+            placeholder="you@example.com"
+          />
+          {errors.email && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.email}</p>}
+        </div>
+        <div className="space-y-1">
+          <label className={labelBase}>Zip Code <span className="text-red-500">*</span></label>
+          <input
+            name="zip"
+            className={`${input} ${errors.zip ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
+            placeholder="30308"
+          />
+          {errors.zip && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.zip}</p>}
+        </div>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className={labelBase}>Email <span className="text-red-500">*</span></label>
-              <input
-                name="email"
-                type="email"
-                className={`${inputBase} ${errors.email ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
-                placeholder="you@example.com"
-              />
-              {errors.email && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.email}</p>}
-            </div>
-            <div className="space-y-1">
-              <label className={labelBase}>Zip Code <span className="text-red-500">*</span></label>
-              <input
-                name="zip"
-                className={`${inputBase} ${errors.zip ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
-                placeholder="30308"
-              />
-              {errors.zip && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.zip}</p>}
-            </div>
-          </div>
+      <div className="space-y-1">
+        <label className={labelBase}>Street Address <span className="text-red-500">*</span></label>
+        <input
+          name="address"
+          autoComplete="street-address"
+          className={`${input} ${errors.address ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
+          placeholder="123 Peachtree St NW"
+        />
+        {errors.address ? (
+          <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.address}</p>
+        ) : (
+          <p className="text-[10px] text-obsidian/30 dark:text-white/30 ml-1">
+            We verify this against your ZIP to make sure we got it right.
+          </p>
+        )}
+      </div>
 
-          <div className="space-y-1">
-            <label className={labelBase}>Street Address <span className="text-red-500">*</span></label>
-            <input
-              name="address"
-              autoComplete="street-address"
-              className={`${inputBase} ${errors.address ? 'border-red-500/50 ring-1 ring-red-500/20' : ''}`}
-              placeholder="123 Peachtree St NW"
-            />
-            {errors.address ? (
-              <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.address}</p>
-            ) : (
-              <p className="text-[10px] text-obsidian/30 dark:text-white/30 ml-1">
-                We verify this against your ZIP to make sure we got it right.
-              </p>
-            )}
-          </div>
+      <div className="space-y-3">
+        <label className={labelBase}>Service Type <span className="text-red-500">*</span></label>
+        <div className="grid grid-cols-3 gap-2">
+          {services.map((service) => {
+            const selected = selectedService === service
+            const baseUnselected = isHero
+              ? 'bg-white/70 dark:bg-white/[0.08] backdrop-blur-sm text-obsidian/70 dark:text-white/70 border-white/50 dark:border-white/15 hover:bg-white/90 dark:hover:bg-white/[0.14]'
+              : 'bg-soft-zinc dark:bg-white/5 text-obsidian/40 dark:text-white/40 border-transparent hover:border-obsidian/10 dark:hover:border-white/10'
+            return (
+              <button
+                key={service}
+                type="button"
+                onClick={() => {
+                  setSelectedService(service)
+                  if (errors.service) setErrors(prev => ({ ...prev, service: '' }))
+                }}
+                className={`py-3 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
+                  selected
+                    ? 'bg-obsidian dark:bg-white text-white dark:text-obsidian border-obsidian dark:border-white'
+                    : errors.service
+                      ? 'bg-red-50 dark:bg-red-500/5 border-red-500/50 text-red-500'
+                      : baseUnselected
+                }`}
+              >
+                {service}
+              </button>
+            )
+          })}
+        </div>
+        {errors.service && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.service}</p>}
+      </div>
 
-          <div className="space-y-3">
-            <label className={labelBase}>Service Type <span className="text-red-500">*</span></label>
-            <div className="grid grid-cols-3 gap-2">
-              {services.map((service) => (
-                <button
-                  key={service}
-                  type="button"
-                  onClick={() => {
-                    setSelectedService(service)
-                    if (errors.service) setErrors(prev => ({ ...prev, service: '' }))
-                  }}
-                  className={`py-3 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
-                    selectedService === service
-                      ? 'bg-obsidian dark:bg-white text-white dark:text-obsidian border-obsidian dark:border-white'
-                      : errors.service 
-                        ? 'bg-red-50 dark:bg-red-500/5 border-red-500/50 text-red-500'
-                        : 'bg-soft-zinc dark:bg-white/5 text-obsidian/40 dark:text-white/40 border-transparent hover:border-obsidian/10 dark:hover:border-white/10'
-                  }`}
-                >
-                  {service}
-                </button>
-              ))}
-            </div>
-            {errors.service && <p className="text-[10px] text-red-500 font-bold ml-1 animate-fade-up">{errors.service}</p>}
-          </div>
-          
-          {errors.root && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
-              <AlertCircle size={14} />
-              {errors.root}
-            </div>
-          )}
+      {errors.root && (
+        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
+          <AlertCircle size={14} />
+          {errors.root}
+        </div>
+      )}
 
-          <div className="space-y-4 pt-2">
-            <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-obsidian/40 dark:text-white/40">
-                ✦ We will call you in 30 seconds
-              </span>
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full py-4 text-xs tracking-[0.2em] uppercase font-bold" 
-              disabled={isPending}
-            >
-              {isPending ? 'Sending...' : 'Get My Free Quote'}
-            </Button>
-          </div>
-        </form>
+      <div className="space-y-3 pt-1">
+        <div className="text-center">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-obsidian/40 dark:text-white/40">
+            ✦ We will call you in 30 seconds
+          </span>
+        </div>
+        <Button
+          type="submit"
+          className="w-full py-4 text-xs tracking-[0.2em] uppercase font-bold"
+          disabled={isPending}
+        >
+          {isPending ? 'Sending...' : 'Get My Free Quote'}
+        </Button>
+      </div>
+    </form>
+  )
+
+  const formContent = isHero ? (
+    <div className="rounded-3xl bg-white/85 dark:bg-obsidian/75 backdrop-blur-2xl backdrop-saturate-150 border border-white/60 dark:border-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.55)] p-6 md:p-8 space-y-6">
+      {heading}
+      {formBody}
+    </div>
+  ) : (
+    <div className="space-y-6">
+      {heading}
+      <Card>
+        {formBody}
       </Card>
     </div>
   )
@@ -209,10 +229,10 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
     <section id="book" className="relative pt-20 pb-40 px-4 overflow-hidden transition-colors duration-500">
       {/* Cinematic Background Layer - Matched to Hero */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-obsidian">
-        <img 
-          src="/hero.png" 
-          alt="Cinematic Background" 
-          className="w-full h-full object-cover opacity-60 animate-[ken-burns_30s_infinite_alternate]" 
+        <img
+          src="/hero.png"
+          alt="Cinematic Background"
+          className="w-full h-full object-cover opacity-60 animate-[ken-burns_30s_infinite_alternate]"
         />
         {/* Mirror Hero Gradients */}
         <div className="absolute inset-0 bg-linear-to-r from-pristine dark:from-obsidian via-pristine/40 dark:via-obsidian/40 to-transparent transition-colors duration-500" />
@@ -222,7 +242,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        <SectionHeader 
+        <SectionHeader
           eyebrow="Get Started"
           title="Begin your"
           titleItalic="transformation."
