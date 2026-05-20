@@ -1,6 +1,9 @@
 import { Card } from "../ui/Card"
-import { Star } from "lucide-react"
+import { Star, ArrowUpRight } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
+import { Button } from "../ui/Button"
+
+const GMB_URL = "https://www.google.com/maps/place/Shalomcleans/@33.7673845,-84.420207,17z/data=!4m6!3m5!1s0xa34626299f26ddb1:0x896633d08e796414!8m2!3d33.7673845!4d-84.420207!16s%2Fg%2F11nb6s4cvs"
 
 export const Testimonials = () => {
   const reviews = [
@@ -51,6 +54,15 @@ export const Testimonials = () => {
               </div>
             </Card>
           ))}
+        </div>
+
+        <div className="mt-12 flex justify-center">
+          <a href={GMB_URL} target="_blank" rel="noopener noreferrer">
+            <Button variant="secondary" size="md">
+              Write a Review
+              <ArrowUpRight size={14} className="ml-1 opacity-70" />
+            </Button>
+          </a>
         </div>
       </div>
     </section>
