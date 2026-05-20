@@ -8,21 +8,21 @@ const GMB_URL = "https://www.google.com/maps/place/Shalomcleans/@33.7673845,-84.
 export const Testimonials = () => {
   const reviews = [
     {
-      author: "Sarah Jenkins",
-      role: "Homeowner, Buckhead",
-      content: "Shalom Cleans has truly changed my weekends. I come home and instantly feel the 'peace' they promise. The attention to detail is unmatched.",
+      author: "Anthony Jean",
+      role: "a week ago",
+      content: "I had an amazing experience with this cleaning company! They were on time, professional, and paid attention to every little detail. My place looked and smelled incredible when they were done — honestly better than I expected. The team was super friendly and easy to work with, and they made the whole process smooth from start to finish. You can tell they actually care about the quality of their work.",
       rating: 5,
     },
     {
-      author: "Michael Chen",
-      role: "Studio Manager",
-      content: "Professional, punctual, and pristine. They handle our creative studio with such care. Highly recommend their commercial service.",
+      author: "Oke Ogheneroro David",
+      role: "2 weeks ago",
+      content: "I don't usually write reviews, but I had to for Shalom Cleans. They came through and honestly exceeded my expectations. Very professional, on time, and the attention to detail was impressive. You can tell they actually care about the work they do and not just rushing to finish. I definitely recommend them.",
       rating: 5,
     },
     {
-      author: "Emma Rodriguez",
-      role: "New Parent",
-      content: "As a new mom, keeping the house clean was impossible. Shalom Cleans has been a lifesaver. Their eco-friendly products give me peace of mind.",
+      author: "Tosin Emiola",
+      role: "a day ago",
+      content: "ShalomCleans is amazing! They're always on time, very professional, and do a super thorough job. My house looks and feels spotless every time they come. The team is friendly, respectful, and pays attention to detail. Highly recommend!",
       rating: 5,
     },
   ]
@@ -30,12 +30,23 @@ export const Testimonials = () => {
   return (
     <section id="reviews" className="py-20 md:py-24 bg-transparent">
       <div className="max-w-7xl mx-auto px-4">
-        <SectionHeader 
-          eyebrow="Kind Words"
-          title="Voices of"
-          titleItalic="serenity."
-          description="We take pride in the peace we bring to our clients' homes. Here is what they have to say about the Shalom experience."
+        <SectionHeader
+          eyebrow="Google Reviews"
+          title="Five-star"
+          titleItalic="service."
+          description="Don't take our word for it — here's what Atlanta homeowners have to say about Shalom Cleans on Google."
         />
+
+        {/* Rating summary */}
+        <div className="-mt-12 mb-12 flex flex-wrap items-center justify-center gap-3 text-sm">
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((j) => (
+              <Star key={j} size={18} className="fill-obsidian dark:fill-white text-obsidian dark:text-white transition-colors duration-500" />
+            ))}
+          </div>
+          <span className="font-display text-2xl font-medium text-obsidian dark:text-white transition-colors duration-500">5.0</span>
+          <span className="text-obsidian/50 dark:text-white/50 transition-colors duration-500">· Based on 27 reviews on Google</span>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {reviews.map((review, i) => (
@@ -45,7 +56,7 @@ export const Testimonials = () => {
                   <Star key={j} size={14} className="fill-obsidian dark:fill-white text-obsidian dark:text-white transition-colors duration-500" />
                 ))}
               </div>
-              <p className="text-lg italic text-obsidian/80 dark:text-white/80 mb-8 leading-relaxed transition-colors duration-500">
+              <p className="text-base text-obsidian/80 dark:text-white/80 mb-8 leading-relaxed transition-colors duration-500">
                 "{review.content}"
               </p>
               <div>
