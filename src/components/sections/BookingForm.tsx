@@ -5,8 +5,8 @@ import { Card } from "../ui/Card"
 import { CheckCircle2, AlertCircle } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 
-const inputBase = "w-full px-4 py-2.5 rounded-xl bg-soft-zinc dark:bg-white/10 border-transparent focus:bg-white dark:focus:bg-white/15 focus:ring-1 focus:ring-obsidian/10 dark:focus:ring-white/20 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/30"
-const inputHero = "w-full px-4 py-2.5 rounded-xl bg-white/90 dark:bg-white/[0.12] backdrop-blur-md border border-white/60 dark:border-white/15 focus:bg-white dark:focus:bg-white/[0.18] focus:border-obsidian/30 dark:focus:border-white/30 focus:ring-0 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/40"
+const inputBase = "w-full px-4 py-2.5 rounded-xl bg-soft-zinc dark:bg-white/10 border-transparent focus:bg-pristine dark:focus:bg-white/15 focus:ring-1 focus:ring-obsidian/10 dark:focus:ring-white/20 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/30"
+const inputHero = "w-full px-4 py-2.5 rounded-xl bg-white/90 dark:bg-white/[0.12] backdrop-blur-md border border-white/60 dark:border-white/15 focus:bg-pristine dark:focus:bg-white/[0.18] focus:border-obsidian/30 dark:focus:border-white/30 focus:ring-0 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/40"
 const labelBase = "text-[10px] font-bold uppercase tracking-widest text-obsidian/60 dark:text-white/55 transition-colors duration-500"
 
 export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
@@ -171,7 +171,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
                 }}
                 className={`py-3 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
                   selected
-                    ? 'bg-obsidian dark:bg-white text-white dark:text-obsidian border-obsidian dark:border-white'
+                    ? 'bg-obsidian dark:bg-pristine text-white dark:text-obsidian border-obsidian dark:border-white'
                     : errors.service
                       ? 'bg-red-50 dark:bg-red-500/5 border-red-500/50 text-red-500'
                       : baseUnselected
@@ -226,7 +226,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
   if (isHero) return formContent
 
   return (
-    <section id="book" className="relative pt-20 pb-40 px-4 overflow-hidden transition-colors duration-500">
+    <section id="book" className="relative py-20 md:py-24 px-4 overflow-hidden transition-colors duration-500">
       {/* Cinematic Background Layer - Matched to Hero */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-obsidian">
         <img

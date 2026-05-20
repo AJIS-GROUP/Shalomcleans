@@ -25,7 +25,7 @@ export const Testimonials = () => {
   ]
 
   return (
-    <section id="reviews" className="py-32 bg-transparent">
+    <section id="reviews" className="py-20 md:py-24 bg-transparent">
       <div className="max-w-7xl mx-auto px-4">
         <SectionHeader 
           eyebrow="Kind Words"

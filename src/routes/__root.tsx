@@ -4,6 +4,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { X } from 'lucide-react'
 import appCss from '../styles.css?url'
 import { Header } from '../components/layout/Header'
+import { PromoBanner } from '../components/sections/PromoBanner'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -132,7 +133,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="selection:bg-serenity selection:text-obsidian overflow-x-hidden" suppressHydrationWarning>
-        {!isAdmin && <Header />}
+        {!isAdmin && (
+          <>
+            <PromoBanner />
+            <Header />
+          </>
+        )}
         <main>
           {children}
         </main>

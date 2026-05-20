@@ -21,7 +21,7 @@ export const Hero = () => {
   }
 
   return (
-    <section className="relative min-h-dvh flex items-center justify-center overflow-hidden px-4 pt-32 pb-20 md:pt-32 md:pb-20">
+    <section className="relative min-h-dvh flex items-center justify-center overflow-hidden px-4 pt-20 pb-20 md:pb-20">
       {/* Background Image with Cinematic Overlay */}
       <div className="absolute inset-0 z-0 bg-obsidian">
         <img
@@ -37,9 +37,9 @@ export const Hero = () => {
         {/* Left Side: Editorial Content */}
         <div className="space-y-10 animate-fade-up">
           <div className="flex items-center gap-4">
-            <img src="/shalomcleans.png" alt="Shalom Logo" className="w-16 h-16 object-contain brightness-0 dark:invert transition-all duration-500" />
+            <img src="/shalomcleans.png" alt="Shalom Logo" className="w-24 h-24 object-contain brightness-0 dark:invert transition-all duration-500" />
             <div className="h-10 w-px bg-obsidian/10 dark:bg-white/10" />
-            
+
             {/* Desktop Badge — secret admin trigger: 3 quick clicks */}
             <button
               type="button"
@@ -48,7 +48,7 @@ export const Hero = () => {
               className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/5 dark:bg-white/5 border border-obsidian/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-obsidian dark:text-white transition-colors duration-500 cursor-default select-none"
             >
               <Sparkles size={12} className="text-obsidian/60 dark:text-white/60" />
-              The New Standard
+              Premium Residential Cleaning
             </button>
 
             {/* Mobile Button */}
@@ -56,33 +56,40 @@ export const Hero = () => {
               href={BOOK_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex md:hidden items-center gap-2 px-5 py-2.5 rounded-full bg-obsidian dark:bg-white text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-lg shadow-obsidian/20 dark:shadow-white/10 active:scale-95 transition-all duration-300"
+              className="inline-flex md:hidden items-center gap-2 px-5 py-2.5 rounded-full bg-obsidian dark:bg-pristine text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-lg shadow-obsidian/20 dark:shadow-white/10 active:scale-95 transition-all duration-300"
             >
               Book Now
             </a>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-display font-medium tracking-tighter leading-[0.85] text-balance text-obsidian dark:text-white transition-colors duration-500">
-            Restore Your <br />
-            <span className="italic text-obsidian/80 dark:text-white/80 underline decoration-8 underline-offset-8 transition-colors duration-500">Sanctuary.</span>
+          <h1 className="text-5xl md:text-7xl font-display font-medium tracking-tighter leading-[0.9] text-balance text-obsidian dark:text-white transition-colors duration-500">
+            Professional House Cleaning in Atlanta <br />
+            <span className="italic text-obsidian/60 dark:text-white/60 transition-colors duration-500">Get your free quote in 30 seconds.</span>
           </h1>
 
-          <p className="max-w-md text-xl md:text-2xl text-obsidian/80 dark:text-white/80 font-medium leading-tight text-balance transition-colors duration-500">
-            We don't just scrub and sweep. we curate the tranquility of your home.
+          <p className="max-w-md text-lg md:text-xl text-obsidian/70 dark:text-white/70 font-medium leading-relaxed text-balance transition-colors duration-500">
+            Standard, Deep Clean & Move-In/Move-Out services across Midtown, Buckhead, Marietta & beyond. Trusted by discerning Atlanta homeowners.
           </p>
 
-          <div className="flex items-center gap-8 pt-4">
-            <div className="flex -space-x-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-obsidian bg-soft-zinc dark:bg-white/10 overflow-hidden">
-                  <img src={`https://picsum.photos/seed/cleaner${i}/80/80`} alt="Cleaner" />
-                </div>
-              ))}
-            </div>
-            <div className="text-sm font-semibold">
-              <div className="text-obsidian dark:text-white transition-colors duration-500">Trusted by 500+</div>
-              <div className="text-obsidian/40 dark:text-white/40 transition-colors duration-500">Happy Homeowners</div>
-            </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-3 pt-2">
+            {["Licensed & Insured", "Same-Week Availability", "Satisfaction Guarantee"].map((label) => (
+              <span
+                key={label}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-obsidian/70 dark:text-white/70 transition-colors duration-500"
+              >
+                <Sparkles size={12} className="text-obsidian/40 dark:text-white/40" />
+                {label}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-obsidian/5 dark:bg-white/10 border border-obsidian/10 dark:border-white/10 text-[11px] font-semibold tracking-wide text-obsidian/70 dark:text-white/70 transition-colors duration-500">
+              Mon–Sat · 9AM – 6PM
+            </span>
+            <span className="text-[11px] text-obsidian/40 dark:text-white/40 transition-colors duration-500">
+              · Atlanta Metro · 40-mile radius
+            </span>
           </div>
         </div>
 

@@ -15,6 +15,7 @@ const csp = [
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https://*.vapi.ai https://*.convex.site https://*.convex.cloud",
   "connect-src 'self' https://*.convex.cloud https://*.convex.site https://api.vapi.ai wss://*.convex.cloud",
+  "frame-src 'self' https://www.instagram.com https://instagram.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

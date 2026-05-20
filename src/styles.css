@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-pristine: #ffffff;
+  --color-pristine: #faf8f3;
   --color-serenity: #f0f7ff;
   --color-obsidian: #0a0a0b;
   --color-soft-zinc: #f4f4f5;
@@ -52,7 +52,7 @@
 
 @layer utilities {
   .glass-pill {
-    @apply backdrop-blur-xl bg-white/70 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.04)];
+    @apply backdrop-blur-xl bg-pristine/70 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.04)];
   }
 
   :is(.dark) .glass-pill {
@@ -68,7 +68,7 @@
   }
 
   .double-bezel-inner {
-    @apply rounded-[calc(2rem-0.375rem)] bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)];
+    @apply rounded-[calc(2rem-0.375rem)] bg-pristine shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)];
   }
 
   :is(.dark) .double-bezel-inner {
@@ -106,3 +106,4 @@
 .animate-fade-up {
   animation: fade-up 0.8s var(--ease-fluid) forwards;
 }
+

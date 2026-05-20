@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Hero } from '../components/sections/Hero'
-import { Services } from '../components/sections/Services'
-import { Gallery } from '../components/sections/Gallery'
+import { RecurringPlans } from '../components/sections/RecurringPlans'
 import { Testimonials } from '../components/sections/Testimonials'
+import { Process } from '../components/sections/Process'
+import { ShalomDifference } from '../components/sections/ShalomDifference'
+import { InstagramFeed } from '../components/sections/InstagramFeed'
 import { BookingForm } from '../components/sections/BookingForm'
-import { FAQ } from '../components/sections/FAQ'
-import { Philosophy } from '../components/sections/Philosophy'
+import { FinalCTA } from '../components/sections/FinalCTA'
 import { Footer } from '../components/layout/Footer'
 
 export const Route = createFileRoute('/')({ component: Home })
@@ -14,13 +15,13 @@ function Home() {
   return (
     <div>
       <Hero />
-      <Services />
-      <Gallery />
-      <Philosophy />
-
+      <RecurringPlans />
       <Testimonials />
-      <FAQ />
+      <Process />
+      <ShalomDifference />
+      <InstagramFeed />
       <BookingForm />
+      <FinalCTA />
       <Footer />
     </div>
   )
