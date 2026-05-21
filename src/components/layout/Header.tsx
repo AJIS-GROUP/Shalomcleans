@@ -1,4 +1,3 @@
-"use client"
 import { Link } from '@tanstack/react-router'
 import { Menu, X, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -21,9 +20,9 @@ const navLinks: NavLink[] = [
 ]
 
 const linkClass = (primary?: boolean) =>
-  `inline-flex items-center gap-1.5 text-sm font-medium transition-all duration-300 ${primary
-    ? 'bg-obsidian dark:bg-pristine text-white dark:text-obsidian px-7 py-3 rounded-xl hover:scale-105 active:scale-95 shadow-lg shadow-obsidian/10 dark:shadow-white/10'
-    : 'text-obsidian/60 dark:text-white/60 hover:text-obsidian dark:hover:text-white hover:-translate-y-px'
+  `inline-flex items-center gap-1.5 text-sm font-medium ${primary
+    ? 'bg-obsidian dark:bg-pristine text-white dark:text-obsidian px-7 py-3 rounded-xl transition-transform duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-obsidian/10 dark:shadow-white/10'
+    : 'text-obsidian/60 dark:text-white/60 transition-colors duration-200 hover:text-obsidian dark:hover:text-white'
   }`
 
 const renderLinkInner = (link: NavLink) => (
@@ -63,10 +62,12 @@ const NavLinks = ({ onLinkClick }: { onLinkClick?: () => void }) => (
 
 const Logo = ({ withWordmark }: { withWordmark?: boolean }) => (
   <Link to="/" className="flex items-center gap-3 group">
-    <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+    <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
       <img
-        src="/shalomcleans.png"
+        src="/shalomcleans.webp"
         alt="Shalom Cleans Logo"
+        width="40"
+        height="40"
         className="w-full h-full brightness-0 dark:invert object-contain"
       />
     </div>

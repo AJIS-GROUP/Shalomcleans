@@ -25,7 +25,7 @@ export const Hero = () => {
       {/* Background Image with Cinematic Overlay */}
       <div className="absolute inset-0 z-0 bg-obsidian">
         <img
-          src="/hero.png"
+          src="/hero.webp"
           alt="Pristine Living Room"
           loading="eager"
           fetchPriority="high"
@@ -39,7 +39,7 @@ export const Hero = () => {
         {/* Left Side: Editorial Content */}
         <div className="space-y-10 animate-fade-up">
           <div className="flex items-center gap-4">
-            <img src="/shalomcleans.png" alt="Shalom Logo" className="w-24 h-24 object-contain brightness-0 dark:invert" />
+            <img src="/shalomcleans.webp" alt="Shalom Logo" width="96" height="96" className="w-24 h-24 object-contain brightness-0 dark:invert" />
             <div className="h-10 w-px bg-obsidian/10 dark:bg-white/10" />
 
             {/* Desktop Badge — secret admin trigger: 3 quick clicks */}
@@ -58,7 +58,7 @@ export const Hero = () => {
               href={BOOK_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex md:hidden items-center gap-2 px-5 py-2.5 rounded-full bg-obsidian dark:bg-pristine text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-lg shadow-obsidian/20 dark:shadow-white/10 active:scale-95 transition-all duration-300"
+              className="inline-flex md:hidden items-center gap-2 px-5 py-2.5 rounded-full bg-obsidian dark:bg-pristine text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-lg shadow-obsidian/20 dark:shadow-white/10 active:scale-95 transition-transform duration-150"
             >
               Book Now
             </a>

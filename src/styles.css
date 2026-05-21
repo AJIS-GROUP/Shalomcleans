@@ -48,11 +48,11 @@
 
 @layer utilities {
   .glass-pill {
-    @apply backdrop-blur-xl bg-pristine/70 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.04)];
+    @apply bg-pristine/95 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.04)];
   }
 
   :is(.dark) .glass-pill {
-    @apply bg-obsidian/70 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)];
+    @apply bg-obsidian/90 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)];
   }
 
   .double-bezel {
@@ -81,12 +81,10 @@
   from {
     opacity: 0;
     transform: translateY(20px);
-    filter: blur(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: blur(0);
   }
 }
 

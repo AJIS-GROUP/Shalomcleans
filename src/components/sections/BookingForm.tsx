@@ -5,7 +5,7 @@ import { Card } from "../ui/Card"
 import { CheckCircle2, AlertCircle } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 
-const inputBase = "w-full px-4 py-2.5 rounded-xl bg-soft-zinc dark:bg-white/10 border-transparent focus:bg-pristine dark:focus:bg-white/15 focus:ring-1 focus:ring-obsidian/10 dark:focus:ring-white/20 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/30"
+const inputBase = "w-full px-4 py-2.5 rounded-xl bg-soft-zinc dark:bg-white/10 border-transparent focus:bg-pristine dark:focus:bg-white/15 focus:ring-1 focus:ring-obsidian/10 dark:focus:ring-white/20 transition-colors outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/30"
 const inputHero = "w-full px-4 py-2.5 rounded-xl bg-white/95 dark:bg-white/[0.14] border border-white/60 dark:border-white/15 focus:bg-pristine dark:focus:bg-white/[0.18] focus:border-obsidian/30 dark:focus:border-white/30 focus:ring-0 transition-colors outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/40"
 const labelBase = "text-[10px] font-bold uppercase tracking-widest text-obsidian/60 dark:text-white/55"
 
@@ -159,7 +159,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
           {services.map((service) => {
             const selected = selectedService === service
             const baseUnselected = isHero
-              ? 'bg-white/70 dark:bg-white/[0.08] backdrop-blur-sm text-obsidian/70 dark:text-white/70 border-white/50 dark:border-white/15 hover:bg-white/90 dark:hover:bg-white/[0.14]'
+              ? 'bg-white/85 dark:bg-white/[0.08] text-obsidian/70 dark:text-white/70 border-white/50 dark:border-white/15 hover:bg-white/95 dark:hover:bg-white/[0.14]'
               : 'bg-soft-zinc dark:bg-white/5 text-obsidian/40 dark:text-white/40 border-transparent hover:border-obsidian/10 dark:hover:border-white/10'
             return (
               <button
@@ -169,7 +169,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
                   setSelectedService(service)
                   if (errors.service) setErrors(prev => ({ ...prev, service: '' }))
                 }}
-                className={`py-3 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
+                className={`py-3 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors duration-200 border ${
                   selected
                     ? 'bg-obsidian dark:bg-pristine text-white dark:text-obsidian border-obsidian dark:border-white'
                     : errors.service
@@ -230,9 +230,11 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
       {/* Cinematic Background Layer - Matched to Hero */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-obsidian">
         <img
-          src="/hero.png"
+          src="/hero.webp"
           alt="Cinematic Background"
-          className="w-full h-full object-cover opacity-60 animate-[ken-burns_30s_infinite_alternate] motion-reduce:animate-none will-change-transform"
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover opacity-60"
         />
         {/* Mirror Hero Gradients */}
         <div className="absolute inset-0 bg-linear-to-r from-pristine dark:from-obsidian via-pristine/40 dark:via-obsidian/40 to-transparent" />

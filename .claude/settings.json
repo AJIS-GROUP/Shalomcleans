@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(wait %1)",
-      "Bash(bun pm *)"
+      "Bash(bun pm *)",
+      "Bash(convert hero.png -quality 82 -define webp:method=6 hero.webp)",
+      "Bash(convert shalomcleans.png -quality 90 -define webp:method=6 shalomcleans.webp)",
+      "Bash(bun run *)"
     ]
   }
 }

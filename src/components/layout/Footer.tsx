@@ -3,8 +3,8 @@ export const Footer = () => {
     <footer className="py-12 border-t border-obsidian/5 dark:border-white/10 bg-soft-zinc/20 dark:bg-white/5">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
-            <img src="/shalomcleans.png" alt="Shalom Cleans Logo" className="w-full h-full brightness-0 dark:invert object-contain" />
+          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+            <img src="/shalomcleans.webp" alt="Shalom Cleans Logo" width="40" height="40" loading="lazy" decoding="async" className="w-full h-full brightness-0 dark:invert object-contain" />
           </div>
           <span className="font-display font-semibold tracking-tight text-obsidian dark:text-white text-sm uppercase">Shalom Cleans</span>
         </div>

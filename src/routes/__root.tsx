@@ -87,7 +87,14 @@ export const Route = createRootRoute({
       {
         rel: 'icon',
         type: 'image/png',
-        href: '/shalomcleans.png',
+        href: '/logo192.png',
+      },
+      {
+        rel: 'preload',
+        as: 'image',
+        href: '/hero.webp',
+        type: 'image/webp',
+        fetchPriority: 'high',
       },
     ],
   }),
@@ -100,7 +107,7 @@ export const Route = createRootRoute({
         <p className="text-obsidian/60 max-w-sm">
           The page you're looking for has been moved or cleaned away.
         </p>
-        <Link to="/" className="bg-obsidian text-white px-8 py-3 rounded-full hover:scale-105 active:scale-95 transition-all">
+        <Link to="/" className="bg-obsidian text-white px-8 py-3 rounded-full hover:scale-105 active:scale-95 transition-transform duration-200">
           Return Home
         </Link>
       </div>
@@ -121,7 +128,7 @@ export const Route = createRootRoute({
         </pre>
         <button
           onClick={() => window.location.reload()}
-          className="bg-obsidian text-white px-8 py-3 rounded-full hover:scale-105 active:scale-95 transition-all"
+          className="bg-obsidian text-white px-8 py-3 rounded-full hover:scale-105 active:scale-95 transition-transform duration-200"
         >
           Try Again
         </button>

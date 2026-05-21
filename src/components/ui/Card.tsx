@@ -9,10 +9,10 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     return (
       <div 
         ref={ref}
-        className={`double-bezel group transition-all duration-700 ease-fluid hover:bg-obsidian/10 ${className}`}
+        className={`double-bezel group transition-colors duration-300 ease-fluid hover:bg-obsidian/10 ${className}`}
         {...props}
       >
-        <div className={`double-bezel-inner h-full p-6 transition-all duration-700 ease-fluid group-hover:shadow-[inset_0_1px_20px_rgba(0,0,0,0.02)] ${innerClassName}`}>
+        <div className={`double-bezel-inner h-full p-6 transition-shadow duration-300 ease-fluid group-hover:shadow-[inset_0_1px_20px_rgba(0,0,0,0.02)] ${innerClassName}`}>
           {children}
         </div>
       </div>

@@ -7,9 +7,11 @@ export const FinalCTA = () => {
       {/* Subtle background image with heavy overlay */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/hero.png"
+          src="/hero.webp"
           alt=""
           aria-hidden="true"
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover opacity-30 dark:opacity-20"
         />
         <div className="absolute inset-0 bg-linear-to-b from-pristine via-pristine/80 to-pristine dark:from-obsidian dark:via-obsidian/80 dark:to-obsidian" />
