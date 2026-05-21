@@ -5,7 +5,11 @@
       "Bash(bun pm *)",
       "Bash(convert hero.png -quality 82 -define webp:method=6 hero.webp)",
       "Bash(convert shalomcleans.png -quality 90 -define webp:method=6 shalomcleans.webp)",
-      "Bash(bun run *)"
+      "Bash(bun run *)",
+      "Bash(convert shalomcleans.png -resize 192x192 -strip favicon-192.png)",
+      "Bash(convert shalomcleans.png -resize 32x32 -strip favicon-32.png)",
+      "Bash(convert shalomcleans.png -resize 16x16 -strip favicon-16.png)",
+      "Bash(convert shalomcleans.png -resize 32x32 favicon.ico)"
     ]
   }
 }
