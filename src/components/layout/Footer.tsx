@@ -6,7 +6,7 @@ export const Footer = () => {
           <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
             <img src="/shalomcleans.png" alt="Shalom Cleans Logo" className="w-full h-full brightness-0 dark:invert object-contain transition-all duration-500" />
           </div>
-          <span className="font-display font-semibold tracking-tight text-obsidian dark:text-white text-sm uppercase transition-colors duration-500">Shalom</span>
+          <span className="font-display font-semibold tracking-tight text-obsidian dark:text-white text-sm uppercase transition-colors duration-500">Shalom Cleans</span>
         </div>
         <div className="text-xs text-obsidian/40 dark:text-white/40 font-medium tracking-widest uppercase text-center md:text-left transition-colors duration-500">
           © 2026 Shalom Cleans. Pristine Spaces, Peaceful Hearts.
