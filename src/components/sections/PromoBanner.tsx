@@ -3,7 +3,7 @@ import { BOOK_URL } from "../../lib/booking-urls"
 
 export const PromoBanner = () => {
   return (
-    <div className="relative z-30 w-full bg-obsidian dark:bg-pristine text-white dark:text-obsidian transition-colors duration-500">
+    <div className="relative z-30 w-full bg-obsidian dark:bg-pristine text-white dark:text-obsidian">
       <div className="mx-auto max-w-7xl px-4 py-2.5 flex items-center justify-center gap-3 text-center">
         <Sparkles size={12} className="hidden sm:inline-block opacity-60" />
         <p className="text-[11px] sm:text-xs font-medium tracking-wide">

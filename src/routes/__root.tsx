@@ -1,7 +1,13 @@
 import { HeadContent, Link, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
+import { lazy, Suspense } from 'react'
 import { X } from 'lucide-react'
+
+const TanStackDevtools = import.meta.env.DEV
+  ? lazy(() => import('@tanstack/react-devtools').then((m) => ({ default: m.TanStackDevtools })))
+  : null
+const TanStackRouterDevtoolsPanel = import.meta.env.DEV
+  ? lazy(() => import('@tanstack/react-router-devtools').then((m) => ({ default: m.TanStackRouterDevtoolsPanel })))
+  : null
 import appCss from '../styles.css?url'
 import { Header } from '../components/layout/Header'
 import { PromoBanner } from '../components/sections/PromoBanner'
@@ -76,7 +82,7 @@ export const Route = createRootRoute({
       },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap',
       },
       {
         rel: 'icon',
@@ -128,7 +134,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const isAdmin = pathname.startsWith('/admin')
   return (
-    <html lang="en" className="dark scroll-smooth" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
@@ -143,17 +149,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           {children}
         </main>
 
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        {TanStackDevtools && TanStackRouterDevtoolsPanel && (
+          <Suspense fallback={null}>
+            <TanStackDevtools
+              config={{ position: 'bottom-right' }}
+              plugins={[
+                {
+                  name: 'Tanstack Router',
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+              ]}
+            />
+          </Suspense>
+        )}
         <Scripts />
       </body>
     </html>

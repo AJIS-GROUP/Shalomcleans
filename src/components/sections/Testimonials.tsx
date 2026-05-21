@@ -41,11 +41,11 @@ export const Testimonials = () => {
         <div className="-mt-12 mb-12 flex flex-wrap items-center justify-center gap-3 text-sm">
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((j) => (
-              <Star key={j} size={18} className="fill-obsidian dark:fill-white text-obsidian dark:text-white transition-colors duration-500" />
+              <Star key={j} size={18} className="fill-obsidian dark:fill-white text-obsidian dark:text-white" />
             ))}
           </div>
-          <span className="font-display text-2xl font-medium text-obsidian dark:text-white transition-colors duration-500">5.0</span>
-          <span className="text-obsidian/50 dark:text-white/50 transition-colors duration-500">· Based on 27 reviews on Google</span>
+          <span className="font-display text-2xl font-medium text-obsidian dark:text-white">5.0</span>
+          <span className="text-obsidian/50 dark:text-white/50">· Based on 27 reviews on Google</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -53,15 +53,15 @@ export const Testimonials = () => {
             <Card key={i} className="h-full">
               <div className="flex gap-1 mb-6">
                 {[...Array(review.rating)].map((_, j) => (
-                  <Star key={j} size={14} className="fill-obsidian dark:fill-white text-obsidian dark:text-white transition-colors duration-500" />
+                  <Star key={j} size={14} className="fill-obsidian dark:fill-white text-obsidian dark:text-white" />
                 ))}
               </div>
-              <p className="text-base text-obsidian/80 dark:text-white/80 mb-8 leading-relaxed transition-colors duration-500">
+              <p className="text-base text-obsidian/80 dark:text-white/80 mb-8 leading-relaxed">
                 "{review.content}"
               </p>
               <div>
-                <div className="font-semibold text-obsidian dark:text-white transition-colors duration-500">{review.author}</div>
-                <div className="text-sm text-obsidian/40 dark:text-white/40 transition-colors duration-500">{review.role}</div>
+                <div className="font-semibold text-obsidian dark:text-white">{review.author}</div>
+                <div className="text-sm text-obsidian/40 dark:text-white/40">{review.role}</div>
               </div>
             </Card>
           ))}

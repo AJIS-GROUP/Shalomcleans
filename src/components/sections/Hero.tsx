@@ -27,17 +27,19 @@ export const Hero = () => {
         <img
           src="/hero.png"
           alt="Pristine Living Room"
-          className="w-full h-full object-cover scale-105 animate-[ken-burns_20s_infinite_alternate] opacity-80"
+          loading="eager"
+          fetchPriority="high"
+          className="w-full h-full object-cover scale-105 animate-[ken-burns_20s_infinite_alternate] motion-reduce:animate-none opacity-80 will-change-transform"
         />
-        <div className="absolute inset-0 bg-linear-to-r from-pristine dark:from-obsidian via-pristine/40 dark:via-obsidian/40 to-transparent transition-colors duration-500" />
-        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-pristine dark:to-obsidian transition-colors duration-500" />
+        <div className="absolute inset-0 bg-linear-to-r from-pristine dark:from-obsidian via-pristine/40 dark:via-obsidian/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-pristine dark:to-obsidian" />
       </div>
 
       <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         {/* Left Side: Editorial Content */}
         <div className="space-y-10 animate-fade-up">
           <div className="flex items-center gap-4">
-            <img src="/shalomcleans.png" alt="Shalom Logo" className="w-24 h-24 object-contain brightness-0 dark:invert transition-all duration-500" />
+            <img src="/shalomcleans.png" alt="Shalom Logo" className="w-24 h-24 object-contain brightness-0 dark:invert" />
             <div className="h-10 w-px bg-obsidian/10 dark:bg-white/10" />
 
             {/* Desktop Badge — secret admin trigger: 3 quick clicks */}
@@ -45,7 +47,7 @@ export const Hero = () => {
               type="button"
               onClick={handleSecretClick}
               aria-label="Shalom Cleans signature mark"
-              className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/5 dark:bg-white/5 border border-obsidian/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-obsidian dark:text-white transition-colors duration-500 cursor-default select-none"
+              className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/5 dark:bg-white/5 border border-obsidian/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-obsidian dark:text-white cursor-default select-none"
             >
               <Sparkles size={12} className="text-obsidian/60 dark:text-white/60" />
               Premium Residential Cleaning
@@ -62,12 +64,12 @@ export const Hero = () => {
             </a>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-display font-medium tracking-tighter leading-[0.9] text-balance text-obsidian dark:text-white transition-colors duration-500">
+          <h1 className="text-5xl md:text-7xl font-display font-medium tracking-tighter leading-[0.9] text-balance text-obsidian dark:text-white">
             Professional House Cleaning in Atlanta <br />
-            <span className="italic text-obsidian/60 dark:text-white/60 transition-colors duration-500">Get your free quote in 30 seconds.</span>
+            <span className="italic text-obsidian/60 dark:text-white/60">Get your free quote in 30 seconds.</span>
           </h1>
 
-          <p className="max-w-md text-lg md:text-xl text-obsidian/70 dark:text-white/70 font-medium leading-relaxed text-balance transition-colors duration-500">
+          <p className="max-w-md text-lg md:text-xl text-obsidian/70 dark:text-white/70 font-medium leading-relaxed text-balance">
             Standard, Deep Clean & Move-In/Move-Out services across Midtown, Buckhead, Marietta & beyond. Trusted by discerning Atlanta homeowners.
           </p>
 
@@ -75,7 +77,7 @@ export const Hero = () => {
             {["Licensed & Insured", "Same-Week Availability", "Satisfaction Guarantee"].map((label) => (
               <span
                 key={label}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-obsidian/70 dark:text-white/70 transition-colors duration-500"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-obsidian/70 dark:text-white/70"
               >
                 <Sparkles size={12} className="text-obsidian/40 dark:text-white/40" />
                 {label}
@@ -84,10 +86,10 @@ export const Hero = () => {
           </div>
 
           <div className="flex items-center gap-3 pt-2">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-obsidian/5 dark:bg-white/10 border border-obsidian/10 dark:border-white/10 text-[11px] font-semibold tracking-wide text-obsidian/70 dark:text-white/70 transition-colors duration-500">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-obsidian/5 dark:bg-white/10 border border-obsidian/10 dark:border-white/10 text-[11px] font-semibold tracking-wide text-obsidian/70 dark:text-white/70">
               Mon–Sat · 9AM – 6PM
             </span>
-            <span className="text-[11px] text-obsidian/40 dark:text-white/40 transition-colors duration-500">
+            <span className="text-[11px] text-obsidian/40 dark:text-white/40">
               · Atlanta Metro · 40-mile radius
             </span>
           </div>

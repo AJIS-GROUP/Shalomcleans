@@ -21,16 +21,12 @@
     box-sizing: border-box;
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
-
   html,
   body,
   #app {
     min-height: 100dvh;
     @apply bg-pristine text-obsidian antialiased selection:bg-serenity selection:text-obsidian;
-    transition: background-color 0.7s var(--ease-fluid), color 0.7s var(--ease-fluid), border-color 0.7s var(--ease-fluid);
+    transition: background-color 0.3s var(--ease-fluid), color 0.3s var(--ease-fluid);
   }
 
   html.dark,
@@ -105,5 +101,29 @@
 
 .animate-fade-up {
   animation: fade-up 0.8s var(--ease-fluid) forwards;
+}
+
+.animate-fade-in-view {
+  opacity: 0;
+  animation: fade-up 0.7s var(--ease-fluid) forwards;
+  animation-timeline: view();
+  animation-range: entry 0% cover 30%;
+}
+
+@supports not (animation-timeline: view()) {
+  .animate-fade-in-view {
+    opacity: 1;
+    animation: fade-up 0.7s var(--ease-fluid) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 

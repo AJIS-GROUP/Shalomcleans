@@ -6,8 +6,8 @@ import { CheckCircle2, AlertCircle } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 
 const inputBase = "w-full px-4 py-2.5 rounded-xl bg-soft-zinc dark:bg-white/10 border-transparent focus:bg-pristine dark:focus:bg-white/15 focus:ring-1 focus:ring-obsidian/10 dark:focus:ring-white/20 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/30"
-const inputHero = "w-full px-4 py-2.5 rounded-xl bg-white/90 dark:bg-white/[0.12] backdrop-blur-md border border-white/60 dark:border-white/15 focus:bg-pristine dark:focus:bg-white/[0.18] focus:border-obsidian/30 dark:focus:border-white/30 focus:ring-0 transition-all outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/40"
-const labelBase = "text-[10px] font-bold uppercase tracking-widest text-obsidian/60 dark:text-white/55 transition-colors duration-500"
+const inputHero = "w-full px-4 py-2.5 rounded-xl bg-white/95 dark:bg-white/[0.14] border border-white/60 dark:border-white/15 focus:bg-pristine dark:focus:bg-white/[0.18] focus:border-obsidian/30 dark:focus:border-white/30 focus:ring-0 transition-colors outline-none text-sm text-obsidian dark:text-white dark:placeholder:text-white/40"
+const labelBase = "text-[10px] font-bold uppercase tracking-widest text-obsidian/60 dark:text-white/55"
 
 export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
   const [submitted, setSubmitted] = useState(false)
@@ -210,7 +210,7 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
   )
 
   const formContent = isHero ? (
-    <div className="rounded-3xl bg-white/85 dark:bg-obsidian/75 backdrop-blur-2xl backdrop-saturate-150 border border-white/60 dark:border-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.55)] p-6 md:p-8 space-y-6">
+    <div className="rounded-3xl bg-white/95 dark:bg-obsidian/85 border border-white/60 dark:border-white/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.55)] p-6 md:p-8 space-y-6">
       {heading}
       {formBody}
     </div>
@@ -226,17 +226,17 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
   if (isHero) return formContent
 
   return (
-    <section id="book" className="relative py-20 md:py-24 px-4 overflow-hidden transition-colors duration-500">
+    <section id="book" className="relative py-20 md:py-24 px-4 overflow-hidden">
       {/* Cinematic Background Layer - Matched to Hero */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-obsidian">
         <img
           src="/hero.png"
           alt="Cinematic Background"
-          className="w-full h-full object-cover opacity-60 animate-[ken-burns_30s_infinite_alternate]"
+          className="w-full h-full object-cover opacity-60 animate-[ken-burns_30s_infinite_alternate] motion-reduce:animate-none will-change-transform"
         />
         {/* Mirror Hero Gradients */}
-        <div className="absolute inset-0 bg-linear-to-r from-pristine dark:from-obsidian via-pristine/40 dark:via-obsidian/40 to-transparent transition-colors duration-500" />
-        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-pristine dark:to-obsidian transition-colors duration-500" />
+        <div className="absolute inset-0 bg-linear-to-r from-pristine dark:from-obsidian via-pristine/40 dark:via-obsidian/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-pristine dark:to-obsidian" />
         {/* Softening overlay for the "Get Started" section specifically */}
         <div className="absolute inset-0 bg-pristine/30 dark:bg-obsidian/30" />
       </div>
@@ -258,12 +258,12 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
             ].map((text) => (
               <div key={text} className="flex items-center gap-4">
                 <div className="w-2 h-2 rounded-full bg-serenity dark:bg-white/20" />
-                <span className="text-sm font-medium text-obsidian dark:text-white transition-colors duration-500">{text}</span>
+                <span className="text-sm font-medium text-obsidian dark:text-white">{text}</span>
               </div>
             ))}
           </div>
-          <div className="p-8 rounded-3xl bg-soft-zinc/50 dark:bg-white/5 border border-obsidian/5 dark:border-white/10 transition-colors duration-500">
-            <p className="text-sm text-obsidian/40 dark:text-white/40 leading-relaxed italic transition-colors duration-500">
+          <div className="p-8 rounded-3xl bg-soft-zinc/50 dark:bg-white/5 border border-obsidian/5 dark:border-white/10">
+            <p className="text-sm text-obsidian/40 dark:text-white/40 leading-relaxed italic">
               "We don't just clean; we restore. Every service is a commitment to your peace of mind."
             </p>
           </div>

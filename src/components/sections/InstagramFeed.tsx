@@ -1,5 +1,3 @@
-"use client"
-import { motion } from "framer-motion"
 import { Instagram, ArrowUpRight } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 import { Button } from "../ui/Button"
@@ -28,7 +26,7 @@ const posts: Post[] = [
 
 export const InstagramFeed = () => {
   return (
-    <section id="instagram" className="relative py-20 md:py-24 px-4 transition-colors duration-500">
+    <section id="instagram" className="relative py-20 md:py-24 px-4">
       <div className="max-w-7xl mx-auto">
         <SectionHeader
           eyebrow="@shalomcleans"
@@ -38,28 +36,24 @@ export const InstagramFeed = () => {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {posts.map((post, i) => (
-            <motion.a
+          {posts.map((post) => (
+            <a
               key={post.label}
               href={PROFILE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="group block"
+              className="group block animate-fade-in-view"
             >
-              <div className="double-bezel rounded-3xl bg-black/2 dark:bg-white/5 p-1.5 transition-all duration-700 hover:bg-obsidian/5 dark:hover:bg-white/10">
-                <div className={`double-bezel-inner relative aspect-square rounded-[1.375rem] overflow-hidden bg-linear-to-br ${post.gradient} transition-colors duration-500`}>
-                  <div className="absolute inset-0 bg-obsidian/40 dark:bg-obsidian/50 transition-colors duration-500" />
+              <div className="double-bezel rounded-3xl bg-black/2 dark:bg-white/5 p-1.5 transition-colors duration-300 hover:bg-obsidian/5 dark:hover:bg-white/10">
+                <div className={`double-bezel-inner relative aspect-square rounded-[1.375rem] overflow-hidden bg-linear-to-br ${post.gradient}`}>
+                  <div className="absolute inset-0 bg-obsidian/40 dark:bg-obsidian/50" />
 
                   <div className="relative z-10 h-full flex flex-col justify-between p-8">
                     <div className="flex items-start justify-between">
-                      <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center">
                         <Instagram size={22} strokeWidth={1.5} className="text-white" />
                       </div>
-                      <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <ArrowUpRight size={18} className="text-white" />
                       </div>
                     </div>
@@ -75,24 +69,18 @@ export const InstagramFeed = () => {
                   </div>
                 </div>
               </div>
-            </motion.a>
+            </a>
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-12 flex justify-center"
-        >
+        <div className="mt-12 flex justify-center animate-fade-in-view">
           <a href={PROFILE_URL} target="_blank" rel="noopener noreferrer">
             <Button variant="primary" size="lg">
               <Instagram size={16} className="mr-1" />
               Follow Us on Instagram
             </Button>
           </a>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

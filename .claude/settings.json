@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wait %1)",
+      "Bash(bun pm *)"
+    ]
+  }
+}

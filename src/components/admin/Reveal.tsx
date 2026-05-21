@@ -1,10 +1,8 @@
-import { motion } from "framer-motion"
 import type { ReactNode } from "react"
 
 export function Reveal({
   children,
   delay = 0,
-  y = 12,
   className,
 }: {
   children: ReactNode
@@ -12,14 +10,13 @@ export function Reveal({
   y?: number
   className?: string
 }) {
+  const style = delay ? { animationDelay: `${delay}s` } : undefined
   return (
-    <motion.div
-      initial={{ opacity: 0, y }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.42, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={className}
+    <div
+      className={`animate-fade-up motion-reduce:animate-none${className ? ` ${className}` : ""}`}
+      style={style}
     >
       {children}
-    </motion.div>
+    </div>
   )
 }

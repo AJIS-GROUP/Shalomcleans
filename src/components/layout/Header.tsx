@@ -67,11 +67,11 @@ const Logo = ({ withWordmark }: { withWordmark?: boolean }) => (
       <img
         src="/shalomcleans.png"
         alt="Shalom Cleans Logo"
-        className="w-full h-full brightness-0 dark:invert object-contain transition-all duration-500"
+        className="w-full h-full brightness-0 dark:invert object-contain"
       />
     </div>
     {withWordmark && (
-      <span className="font-display font-semibold tracking-tight text-obsidian dark:text-white text-sm uppercase transition-colors duration-500">
+      <span className="font-display font-semibold tracking-tight text-obsidian dark:text-white text-sm uppercase">
         Shalom Cleans
       </span>
     )}
@@ -116,7 +116,7 @@ export const Header = () => {
 
       {/* Fixed compact pill — appears once scrolled past the banner */}
       <nav
-        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-6 py-3 glass-pill rounded-2xl flex items-center justify-between transition-all duration-500 ease-fluid ${
+        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-6 py-3 glass-pill rounded-2xl flex items-center justify-between ease-fluid ${
           isScrolled
             ? 'opacity-100 translate-y-0 pointer-events-auto'
             : 'opacity-0 -translate-y-4 pointer-events-none'
@@ -139,7 +139,7 @@ export const Header = () => {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-white/90 dark:bg-obsidian/90 backdrop-blur-2xl transition-all duration-700 ease-fluid md:hidden ${
+        className={`fixed inset-0 z-40 bg-pristine dark:bg-obsidian transition-opacity duration-300 ease-fluid md:hidden ${
           isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -152,7 +152,7 @@ export const Header = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsMenuOpen(false)}
-                className={`text-3xl font-display font-medium text-obsidian dark:text-white transition-all duration-500 ${
+                className={`text-3xl font-display font-medium text-obsidian dark:text-white ${
                   isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
                 }`}
                 style={{ transitionDelay: `${i * 100}ms` }}
@@ -164,7 +164,7 @@ export const Header = () => {
                 key={link.label}
                 to={link.to!}
                 onClick={() => setIsMenuOpen(false)}
-                className={`text-3xl font-display font-medium text-obsidian dark:text-white transition-all duration-500 ${
+                className={`text-3xl font-display font-medium text-obsidian dark:text-white ${
                   isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
                 }`}
                 style={{ transitionDelay: `${i * 100}ms` }}
