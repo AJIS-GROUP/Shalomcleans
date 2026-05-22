@@ -73,13 +73,13 @@ export const Hero = () => {
             Standard, Deep Clean & Move-In/Move-Out services across Midtown, Buckhead, Marietta & beyond. Trusted by discerning Atlanta homeowners.
           </p>
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-3 pt-2">
+          <div className="flex flex-wrap items-center gap-2 pt-2">
             {["Licensed & Insured", "Same-Week Availability", "Satisfaction Guarantee"].map((label) => (
               <span
                 key={label}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-obsidian/70 dark:text-white/70"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-xs font-semibold tracking-wide text-obsidian shadow-sm ring-1 ring-obsidian/5"
               >
-                <Sparkles size={12} className="text-obsidian/40 dark:text-white/40" />
+                <Sparkles size={12} className="text-obsidian/40" />
                 {label}
               </span>
             ))}

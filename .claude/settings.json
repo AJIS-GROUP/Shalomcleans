@@ -9,7 +9,9 @@
       "Bash(convert shalomcleans.png -resize 192x192 -strip favicon-192.png)",
       "Bash(convert shalomcleans.png -resize 32x32 -strip favicon-32.png)",
       "Bash(convert shalomcleans.png -resize 16x16 -strip favicon-16.png)",
-      "Bash(convert shalomcleans.png -resize 32x32 favicon.ico)"
+      "Bash(convert shalomcleans.png -resize 32x32 favicon.ico)",
+      "WebFetch(domain:docs.featurable.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

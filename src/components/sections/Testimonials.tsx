@@ -45,7 +45,7 @@ export const Testimonials = () => {
             ))}
           </div>
           <span className="font-display text-2xl font-medium text-obsidian dark:text-white">5.0</span>
-          <span className="text-obsidian/50 dark:text-white/50">· Based on 27 reviews on Google</span>
+          <span className="text-obsidian/50 dark:text-white/50">· Based on 35 reviews on Google</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
