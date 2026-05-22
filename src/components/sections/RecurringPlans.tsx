@@ -37,7 +37,7 @@ const inclusions = [
 
 export const RecurringPlans = () => {
   return (
-    <section id="plans" className="relative py-20 md:py-24 px-4 bg-soft-zinc/30 dark:bg-white/[0.02]">
+    <section id="services" className="relative py-20 md:py-24 px-4 bg-soft-zinc/30 dark:bg-white/[0.02]">
       <div className="max-w-7xl mx-auto">
         <SectionHeader
           eyebrow="Save More"
@@ -60,11 +60,10 @@ export const RecurringPlans = () => {
                   </div>
                 )}
                 <div
-                  className={`double-bezel rounded-4xl p-1.5 transition-colors duration-300 ${
-                    plan.popular
+                  className={`double-bezel rounded-4xl p-1.5 transition-colors duration-300 ${plan.popular
                       ? "bg-obsidian/10 dark:bg-white/15 hover:bg-obsidian/15 dark:hover:bg-white/20"
                       : "bg-black/2 dark:bg-white/5 hover:bg-obsidian/5 dark:hover:bg-white/10"
-                  }`}
+                    }`}
                 >
                   <div className="double-bezel-inner relative bg-pristine dark:bg-obsidian rounded-[1.625rem] p-8 md:p-10 h-full flex flex-col gap-6">
                     <div className="w-14 h-14 rounded-2xl bg-obsidian/5 dark:bg-white/10 flex items-center justify-center">

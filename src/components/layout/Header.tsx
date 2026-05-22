@@ -11,7 +11,7 @@ type NavLink = {
 }
 
 const navLinks: NavLink[] = [
-  { label: 'Plans', to: '/#plans' },
+  { label: 'Services', to: '/#services' },
   { label: 'How It Works', to: '/#process' },
   { label: 'About', to: '/#about' },
   { label: 'Reviews', to: '/#reviews' },
@@ -49,7 +49,7 @@ const NavLinks = ({ onLinkClick }: { onLinkClick?: () => void }) => (
       ) : (
         <Link
           key={link.label}
-          to={link.to!}
+          to={link.to}
           onClick={onLinkClick}
           className={linkClass(link.primary)}
         >
@@ -94,9 +94,8 @@ export const Header = () => {
     <>
       {/* Static full-width header — absolute, overlays the hero so its image extends to the top */}
       <div
-        className={`absolute inset-x-0 top-10 z-30 transition-opacity duration-300 ${
-          isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'
-        }`}
+        className={`absolute inset-x-0 top-10 z-30 transition-opacity duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Logo withWordmark />
@@ -117,11 +116,10 @@ export const Header = () => {
 
       {/* Fixed compact pill — appears once scrolled past the banner */}
       <nav
-        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-6 py-3 glass-pill rounded-2xl flex items-center justify-between ease-fluid ${
-          isScrolled
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 -translate-y-4 pointer-events-none'
-        }`}
+        className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-6 py-3 glass-pill rounded-2xl flex items-center justify-between ease-fluid ${isScrolled
+          ? 'opacity-100 translate-y-0 pointer-events-auto'
+          : 'opacity-0 -translate-y-4 pointer-events-none'
+          }`}
       >
         <Logo />
 
@@ -140,9 +138,8 @@ export const Header = () => {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-pristine dark:bg-obsidian transition-opacity duration-300 ease-fluid md:hidden ${
-          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 z-40 bg-pristine dark:bg-obsidian transition-opacity duration-300 ease-fluid md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-8">
           {navLinks.map((link, i) =>
@@ -153,9 +150,8 @@ export const Header = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsMenuOpen(false)}
-                className={`text-3xl font-display font-medium text-obsidian dark:text-white ${
-                  isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-                }`}
+                className={`text-3xl font-display font-medium text-obsidian dark:text-white ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                  }`}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 {link.label}
@@ -163,11 +159,10 @@ export const Header = () => {
             ) : (
               <Link
                 key={link.label}
-                to={link.to!}
+                to={link.to}
                 onClick={() => setIsMenuOpen(false)}
-                className={`text-3xl font-display font-medium text-obsidian dark:text-white ${
-                  isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-                }`}
+                className={`text-3xl font-display font-medium text-obsidian dark:text-white ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                  }`}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 {link.label}
