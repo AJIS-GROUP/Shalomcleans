@@ -1,8 +1,9 @@
-import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { createFileRoute, Navigate, Outlet, useLocation } from "@tanstack/react-router"
+import { useState } from "react"
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react"
 import { convexReactClient } from "#/lib/convex-react"
 import { authClient } from "#/lib/auth-client"
+import { useMountEffect } from "#/lib/useMountEffect"
 import { TopNav } from "#/components/admin/TopNav"
 
 export const Route = createFileRoute("/admin")({
@@ -49,12 +50,12 @@ function Frame() {
 
 function DesktopOnlyNotice() {
   const [width, setWidth] = useState<number | null>(null)
-  useEffect(() => {
+  useMountEffect(() => {
     setWidth(window.innerWidth)
     const onResize = () => setWidth(window.innerWidth)
     window.addEventListener("resize", onResize)
     return () => window.removeEventListener("resize", onResize)
-  }, [])
+  })
 
   return (
     <div className="lg:hidden min-h-screen flex flex-col items-center justify-center px-6 text-center">
@@ -85,18 +86,7 @@ function DesktopOnlyNotice() {
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = authClient.useSession()
   const location = useLocation()
-  const navigate = useNavigate()
   const isLoginPage = location.pathname === "/admin/login"
-
-  useEffect(() => {
-    if (isPending) return
-    if (!session && !isLoginPage) {
-      navigate({ to: "/admin/login", replace: true })
-    }
-    if (session && isLoginPage) {
-      navigate({ to: "/admin", replace: true })
-    }
-  }, [session, isPending, isLoginPage, navigate])
 
   if (isPending) {
     return (
@@ -107,9 +97,11 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   if (!session && !isLoginPage) {
-    return (
-      <div className="min-h-screen w-full bg-[#0e0e0f] text-white flex items-center justify-center" />
-    )
+    return <Navigate to="/admin/login" replace />
+  }
+
+  if (session && isLoginPage) {
+    return <Navigate to="/admin" replace />
   }
 
   return <>{children}</>

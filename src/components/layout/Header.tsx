@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { Menu, X, Sparkles } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BOOK_URL, CONTACT_URL } from '../../lib/booking-urls'
+import { useMountEffect } from '../../lib/useMountEffect'
 
 type NavLink = {
   label: string
@@ -83,12 +84,12 @@ export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  useEffect(() => {
+  useMountEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 60)
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  })
 
   return (
     <>
@@ -127,13 +128,24 @@ export const Header = () => {
           <NavLinks />
         </div>
 
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden p-2 text-obsidian dark:text-white hover:bg-obsidian/5 dark:hover:bg-white/10 rounded-full transition-colors"
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <a
+            href={BOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-obsidian dark:bg-pristine text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-md shadow-obsidian/10 dark:shadow-white/10 active:scale-95 transition-transform duration-150"
+          >
+            <Sparkles size={11} className="opacity-80" />
+            Book Now
+          </a>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 text-obsidian dark:text-white hover:bg-obsidian/5 dark:hover:bg-white/10 rounded-full transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Menu Overlay */}

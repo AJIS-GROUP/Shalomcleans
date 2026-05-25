@@ -21,7 +21,7 @@ export const Hero = () => {
   }
 
   return (
-    <section id="quote" className="relative min-h-dvh flex items-center justify-center overflow-hidden px-4 pt-20 pb-20 md:pb-20">
+    <section className="relative flex items-center justify-center overflow-hidden px-4 pt-28 pb-16 md:pt-32 md:pb-20">
       {/* Background Image with Cinematic Overlay */}
       <div className="absolute inset-0 z-0 bg-obsidian">
         <img
@@ -32,7 +32,7 @@ export const Hero = () => {
           className="w-full h-full object-cover scale-105 animate-[ken-burns_20s_infinite_alternate] motion-reduce:animate-none opacity-80 will-change-transform"
         />
         <div className="absolute inset-0 bg-linear-to-r from-pristine dark:from-obsidian via-pristine/40 dark:via-obsidian/40 to-transparent" />
-        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-pristine dark:to-obsidian" />
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-linear-to-b from-transparent to-pristine dark:to-obsidian" />
       </div>
 
       <div className="relative z-10 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -96,7 +96,7 @@ export const Hero = () => {
         </div>
 
         {/* Right Side: Integrated Booking Card */}
-        <div className="animate-fade-up [animation-delay:400ms]">
+        <div id="quote" className="animate-fade-up [animation-delay:400ms] scroll-mt-24">
           <BookingForm isHero />
         </div>
       </div>

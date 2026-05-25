@@ -36,7 +36,7 @@ const inclusions = [
 
 export const RecurringPlans = () => {
   return (
-    <section id="services" className="relative py-20 md:py-24 px-4 bg-soft-zinc/30 dark:bg-white/[0.02]">
+    <section id="services" className="relative pt-12 pb-20 md:pt-16 md:pb-24 px-4 bg-soft-zinc/30 dark:bg-white/[0.02]">
       <div className="max-w-7xl mx-auto">
         <SectionHeader
           eyebrow="Save More"

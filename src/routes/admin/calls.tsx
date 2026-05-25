@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useAction, useQuery } from "convex/react"
 import { Phone, RefreshCw, ExternalLink, Clock, DollarSign, X, MessageCircle } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
 import { Reveal } from "#/components/admin/Reveal"
+import { useMountEffect } from "#/lib/useMountEffect"
 
 export const Route = createFileRoute("/admin/calls")({
   component: CallsPage,
@@ -49,10 +50,9 @@ function CallsPage() {
     }
   }
 
-  useEffect(() => {
-    refresh()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  useMountEffect(() => {
+    void refresh()
+  })
 
   const leadsByCallId = useMemo(() => {
     const map = new Map<string, { name: string; service: string; status: string }>()
