@@ -1,7 +1,6 @@
 import { CalendarDays, CalendarCheck, CalendarRange, Check } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 import { Button } from "../ui/Button"
-import { BOOK_URL } from "../../lib/booking-urls"
 
 type Plan = {
   title: string
@@ -96,7 +95,7 @@ export const RecurringPlans = () => {
               </li>
             ))}
           </ul>
-          <a href={BOOK_URL} target="_blank" rel="noopener noreferrer">
+          <a href="#quote">
             <Button variant="primary" size="lg" withArrow>
               Get My Free Quote
             </Button>

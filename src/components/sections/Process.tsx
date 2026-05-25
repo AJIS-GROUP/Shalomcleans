@@ -1,7 +1,6 @@
 import { FileText, CalendarCheck, Sparkles } from "lucide-react"
 import { SectionHeader } from "../ui/SectionHeader"
 import { Button } from "../ui/Button"
-import { BOOK_URL } from "../../lib/booking-urls"
 
 type Step = {
   number: string
@@ -80,7 +79,7 @@ export const Process = () => {
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-4 animate-fade-in-view">
-          <a href={BOOK_URL} target="_blank" rel="noopener noreferrer">
+          <a href="#quote">
             <Button variant="primary" size="lg" withArrow>
               Get My Free Quote
             </Button>

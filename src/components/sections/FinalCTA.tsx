@@ -1,5 +1,4 @@
 import { Button } from "../ui/Button"
-import { BOOK_URL } from "../../lib/booking-urls"
 
 export const FinalCTA = () => {
   return (
@@ -32,7 +31,7 @@ export const FinalCTA = () => {
         </p>
 
         <div className="flex flex-col items-center gap-4 pt-4">
-          <a href={BOOK_URL} target="_blank" rel="noopener noreferrer">
+          <a href="#quote">
             <Button variant="primary" size="lg" withArrow>
               Request Your Quote
             </Button>

@@ -21,7 +21,7 @@ export const Hero = () => {
   }
 
   return (
-    <section className="relative min-h-dvh flex items-center justify-center overflow-hidden px-4 pt-20 pb-20 md:pb-20">
+    <section id="quote" className="relative min-h-dvh flex items-center justify-center overflow-hidden px-4 pt-20 pb-20 md:pb-20">
       {/* Background Image with Cinematic Overlay */}
       <div className="absolute inset-0 z-0 bg-obsidian">
         <img

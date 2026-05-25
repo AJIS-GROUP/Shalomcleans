@@ -194,6 +194,11 @@ function LeadDrawer({
         <DetailRow icon={<Mail size={14} />} label="Email" value={lead.email} />
         <DetailRow icon={<Phone size={14} />} label="Phone" value={lead.phone} />
         <DetailRow icon={<Users size={14} />} label="Service" value={lead.service} />
+        <DetailRow
+          icon={<MapPin size={14} />}
+          label="Address"
+          value={formatAddress(lead) ?? "—"}
+        />
         <DetailRow icon={<MapPin size={14} />} label="ZIP" value={lead.zip} />
 
         {lead.vapiCallId && (
@@ -274,6 +279,12 @@ function StatusPill({ status }: { status: string }) {
       {status}
     </span>
   )
+}
+
+function formatAddress(lead: Doc<"leads">) {
+  const cityState = [lead.city, lead.state].filter(Boolean).join(", ")
+  const parts = [lead.address, cityState].filter(Boolean)
+  return parts.length ? parts.join(" · ") : null
 }
 
 function initials(name: string) {
