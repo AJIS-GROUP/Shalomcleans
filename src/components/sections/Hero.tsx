@@ -70,7 +70,7 @@ export const Hero = () => {
           </h1>
 
           <p className="max-w-md text-lg md:text-xl text-obsidian/70 dark:text-white/70 font-medium leading-relaxed text-balance">
-            Standard, Deep Clean & Move-In/Move-Out services across Midtown, Buckhead, Marietta & beyond. Trusted by discerning Atlanta homeowners.
+            Standard, Deep Clean & Move-In/Move-Out services across Midtown, Buckhead, Marietta & beyond. Trusted by discerning Atlanta homeowners and businesses.
           </p>
 
           <div className="flex flex-wrap items-center gap-2 pt-2">
