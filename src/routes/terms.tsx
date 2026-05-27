@@ -4,11 +4,11 @@ import { LegalLayout, LegalSection } from "../components/layout/LegalLayout"
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service | Shalom Cleans" },
+      { title: "Terms & Conditions | Shalom Cleans" },
       {
         name: "description",
         content:
-          "The terms that govern your use of Shalom Cleans' website and residential cleaning services in the Atlanta metro area.",
+          "The terms and conditions that govern your use of Shalom Cleans' website and cleaning services.",
       },
     ],
   }),
@@ -17,178 +17,165 @@ export const Route = createFileRoute("/terms")({
 
 function TermsPage() {
   return (
-    <LegalLayout title="Terms of Service" effectiveDate="May 27, 2026">
-      <LegalSection title="Agreement">
+    <LegalLayout title="Terms & Conditions" effectiveDate="May 27, 2026">
+      <LegalSection title="Welcome">
         <p>
-          These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and
-          use of <strong>shalomcleans.com</strong> (the &ldquo;Site&rdquo;) and
-          the residential cleaning services offered by <strong>Shalom Cleans</strong>{" "}
-          (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). By using the
-          Site or booking a service, you agree to these Terms.
+          Welcome to <strong>Shalom Cleans</strong>. These Terms &amp; Conditions
+          govern the use of our services and website. By booking or using our
+          services, you agree to all terms outlined below.
         </p>
       </LegalSection>
 
-      <LegalSection title="Services we offer">
+      <LegalSection title="1. Service scope">
         <p>
-          Shalom Cleans provides residential cleaning services in the Atlanta
-          metropolitan area, including but not limited to:
+          Cleaning services are limited to the tasks included in the selected
+          service package. Additional requests outside the agreed scope may
+          result in extra charges and are subject to cleaner availability.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="2. Estimates & pricing">
+        <p>
+          All quotes provided are estimates based on the information given by
+          the client. Final pricing may increase if:
         </p>
         <ul className="list-disc pl-6 space-y-1">
-          <li>Standard recurring cleaning</li>
-          <li>Deep cleaning</li>
-          <li>Move-in and move-out cleaning</li>
+          <li>The property condition differs significantly from described conditions</li>
+          <li>Additional cleaning time is required</li>
+          <li>Additional rooms, areas, or services are requested</li>
         </ul>
         <p>
-          We currently service homes within an approximate 40-mile radius of
-          Atlanta, including Midtown, Buckhead, Marietta, and surrounding
-          communities.
+          Shalom Cleans reserves the right to adjust pricing upon arrival if
+          necessary.
         </p>
       </LegalSection>
 
-      <LegalSection title="Booking and confirmation">
+      <LegalSection title="3. Payment terms">
         <p>
-          When you submit a quote request on our Site, an automated voice
-          assistant (powered by our partner Vapi) will call you within
-          approximately 30 seconds to confirm your details and schedule the
-          appointment. Final booking is completed through our scheduling partner,
-          BookingKoala. A booking is considered confirmed only after you have
-          received written confirmation from us or BookingKoala.
+          Payment is due immediately upon completion of service unless otherwise
+          agreed in writing. Failure to make payment may result in:
         </p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Late fees</li>
+          <li>Collection efforts</li>
+          <li>Refusal of future services</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="4. Client responsibilities">
+        <p>Clients are responsible for:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Providing access to the property at the scheduled time</li>
+          <li>Ensuring running water and electricity are available</li>
+          <li>Securing valuables, cash, jewelry, and fragile items</li>
+          <li>Informing us of pets, hazards, or special cleaning conditions beforehand</li>
+        </ul>
         <p>
-          We reserve the right to decline a booking that falls outside our service
-          area, exceeds our capacity, or that we determine, in good faith, would
-          be unsafe to perform.
+          Shalom Cleans is not responsible for damage to improperly secured
+          items.
         </p>
       </LegalSection>
 
-      <LegalSection title="Pricing and payment">
+      <LegalSection title="5. Limitation of liability">
+        <p>Shalom Cleans is not liable for:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Pre-existing damage</li>
+          <li>Wear and tear</li>
+          <li>Improperly installed fixtures or decorations</li>
+          <li>Damage resulting from unstable furniture or fragile items</li>
+          <li>Normal wear to surfaces caused by cleaning products or methods</li>
+        </ul>
         <p>
-          Pricing is based on the service type, home size, and any add-ons. Our
-          quote is provided after we collect your service details. Final pricing
-          is confirmed at booking. Payment is processed through BookingKoala
-          according to the terms presented at checkout.
-        </p>
-        <p>
-          Any additional services performed at your request beyond the quoted
-          scope (e.g. extra rooms, special-condition cleaning) may incur
-          additional charges, which we will communicate before performing the
-          work.
-        </p>
-      </LegalSection>
-
-      <LegalSection title="Cancellation and rescheduling">
-        <p>
-          You may cancel or reschedule a confirmed booking up to{" "}
-          <strong>24 hours</strong> before the scheduled start time at no charge.
-          Cancellations within 24 hours of the scheduled time may be subject to a
-          cancellation fee of up to 50% of the booking total.
-        </p>
-        <p>
-          We will make reasonable efforts to notify you in advance if we need to
-          reschedule a booking. If we cannot reschedule to your satisfaction,
-          you will receive a full refund of any pre-paid amount.
+          Any claims for damages must be submitted in writing within{" "}
+          <strong>24 hours</strong> of service completion. Liability for any
+          approved claim shall not exceed the total amount paid for the specific
+          cleaning service.
         </p>
       </LegalSection>
 
-      <LegalSection title="Access and preparation">
+      <LegalSection title="6. Unsafe conditions">
+        <p>Our cleaners may refuse service if the environment contains:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Biohazards</li>
+          <li>Excessive bodily fluids</li>
+          <li>Pest infestations</li>
+          <li>Illegal substances</li>
+          <li>Aggressive pets</li>
+          <li>Unsafe or hostile conditions</li>
+        </ul>
+        <p>In such cases, cancellation fees may still apply.</p>
+      </LegalSection>
+
+      <LegalSection title="7. Photos & marketing">
         <p>
-          You agree to provide our team with safe and reasonable access to the
-          property at the scheduled time. If our team is unable to access the
-          property due to no fault of ours, a lockout fee may apply.
-        </p>
-        <p>
-          For your safety and ours, please secure pets, valuables, and any
-          fragile items prior to our arrival. We are not responsible for damage
-          to or loss of items that were not secured or were left in unsafe
-          conditions.
+          Shalom Cleans may take before-and-after photos for quality control,
+          training, and marketing purposes. Personal or identifying information
+          will not be shared publicly without consent.
         </p>
       </LegalSection>
 
-      <LegalSection title="Satisfaction guarantee">
+      <LegalSection title="8. Intellectual property">
         <p>
-          We stand behind our work. If you are not satisfied with any aspect of
-          our service, contact us within <strong>24 hours</strong> of service
-          completion and we will return to re-clean the affected area at no
-          additional cost.
+          All content, branding, logos, designs, and materials belonging to
+          Shalom Cleans are protected and may not be copied or reproduced
+          without written permission.
         </p>
       </LegalSection>
 
-      <LegalSection title="Liability">
+      <LegalSection title="9. Service guarantee disclaimer">
         <p>
-          Shalom Cleans carries liability insurance for the services we provide.
-          Our liability is limited to the cost of the booking that gave rise to
-          the claim, except in cases of gross negligence or willful misconduct.
-        </p>
-        <p>
-          We are not liable for indirect, incidental, consequential, or punitive
-          damages, including loss of business, lost profits, or property
-          devaluation, arising from our services or the use of our Site.
+          While we strive for excellent results, Shalom Cleans does not
+          guarantee complete removal of all stains, odors, buildup, or damage
+          due to material condition, age, or previous neglect.
         </p>
       </LegalSection>
 
-      <LegalSection title="Site use">
+      <LegalSection title="10. Refund policy">
         <p>
-          You agree not to use our Site or services for any unlawful purpose, to
-          attempt to interfere with the security or operation of our Site, or to
-          submit false or misleading information when requesting a quote.
-        </p>
-      </LegalSection>
-
-      <LegalSection title="Intellectual property">
-        <p>
-          All content on this Site — text, images, logos, design — is owned by
-          Shalom Cleans or used under license, and is protected by copyright and
-          trademark law. You may not reproduce, distribute, or use any content
-          from this Site for commercial purposes without our written permission.
-        </p>
-      </LegalSection>
-
-      <LegalSection title="Privacy">
-        <p>
-          Your use of our Site and services is also governed by our{" "}
+          Refunds, satisfaction concerns, cancellations, and deposits are
+          governed by our{" "}
           <a
-            href="/privacy"
+            href="/refund"
             className="underline hover:text-obsidian dark:hover:text-white"
           >
-            Privacy Policy
+            Refund Policy
           </a>
-          , which describes how we collect, use, and share your personal
-          information.
+          , which forms part of these Terms.
         </p>
       </LegalSection>
 
-      <LegalSection title="Changes to these Terms">
+      <LegalSection title="11. Changes to policies">
         <p>
-          We may update these Terms from time to time. The &ldquo;Effective&rdquo;
-          date at the top of this page reflects the most recent revision. Your
-          continued use of the Site or services after a change constitutes
-          acceptance of the updated Terms.
+          Shalom Cleans reserves the right to update or modify these terms at
+          any time without prior notice.
         </p>
       </LegalSection>
 
-      <LegalSection title="Governing law">
+      <LegalSection title="12. Governing law">
         <p>
-          These Terms are governed by the laws of the State of Georgia, USA,
-          without regard to its conflict of law provisions. Any dispute arising
-          from these Terms or our services will be resolved in the courts of
-          Fulton County, Georgia.
+          These Terms &amp; Conditions shall be governed by and interpreted in
+          accordance with the laws of the State of Georgia.
         </p>
       </LegalSection>
 
-      <LegalSection title="Contact">
-        <p>
-          Questions about these Terms can be sent to:
-        </p>
+      <LegalSection title="13. Contact information">
         <p>
           Shalom Cleans
           <br />
-          Atlanta, GA
-          <br />
+          Email:{" "}
           <a
-            href="mailto:hello@shalomcleans.com"
+            href="mailto:shalomcleans@gmail.com"
             className="underline hover:text-obsidian dark:hover:text-white"
           >
-            hello@shalomcleans.com
+            shalomcleans@gmail.com
+          </a>
+          <br />
+          Phone:{" "}
+          <a
+            href="tel:+14706938192"
+            className="underline hover:text-obsidian dark:hover:text-white"
+          >
+            470-693-8192
           </a>
         </p>
       </LegalSection>

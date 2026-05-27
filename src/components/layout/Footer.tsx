@@ -18,6 +18,7 @@ export const Footer = () => {
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           <Link to="/privacy" className={linkClass}>Privacy</Link>
           <Link to="/terms" className={linkClass}>Terms</Link>
+          <Link to="/refund" className={linkClass}>Refund</Link>
           <a href="https://www.instagram.com/shalomcleans/" target="_blank" rel="noopener noreferrer" className={linkClass}>Instagram</a>
         </div>
       </div>
