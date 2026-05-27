@@ -1,6 +1,9 @@
 import { HeadContent, Link, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 import { X } from 'lucide-react'
+import appCss from '../styles.css?url'
+import { Header } from '../components/layout/Header'
+import { PromoBanner } from '../components/sections/PromoBanner'
 
 const TanStackDevtools = import.meta.env.DEV
   ? lazy(() => import('@tanstack/react-devtools').then((m) => ({ default: m.TanStackDevtools })))
@@ -8,9 +11,12 @@ const TanStackDevtools = import.meta.env.DEV
 const TanStackRouterDevtoolsPanel = import.meta.env.DEV
   ? lazy(() => import('@tanstack/react-router-devtools').then((m) => ({ default: m.TanStackRouterDevtoolsPanel })))
   : null
-import appCss from '../styles.css?url'
-import { Header } from '../components/layout/Header'
-import { PromoBanner } from '../components/sections/PromoBanner'
+
+const META_PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID as string | undefined
+
+const pixelInitScript = META_PIXEL_ID
+  ? `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`
+  : null
 
 export const Route = createRootRoute({
   head: () => ({
@@ -165,8 +171,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
+        {pixelInitScript && (
+          <script dangerouslySetInnerHTML={{ __html: pixelInitScript }} />
+        )}
       </head>
       <body className="selection:bg-serenity selection:text-obsidian overflow-x-hidden" suppressHydrationWarning>
+        {META_PIXEL_ID && (
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: 'none' }}
+              alt=""
+              src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+            />
+          </noscript>
+        )}
         {!isAdmin && (
           <>
             <PromoBanner />
