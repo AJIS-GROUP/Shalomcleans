@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { submitBooking, bookingSchema } from "../../lib/actions"
+import { trackPixel } from "../../lib/meta-pixel"
 import { Button } from "../ui/Button"
 import { Card } from "../ui/Card"
 import { CheckCircle2, AlertCircle } from "lucide-react"
@@ -44,7 +45,12 @@ export const BookingForm = ({ isHero }: { isHero?: boolean }) => {
 
     setIsPending(true)
     try {
-      await submitBooking({ data: result.data })
+      const response = await submitBooking({ data: result.data })
+      trackPixel("Lead", {
+        event_id: response.leadId,
+        content_name: "Booking Request",
+        content_category: result.data.service,
+      })
       setSubmitted(true)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)

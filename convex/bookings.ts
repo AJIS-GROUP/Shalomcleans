@@ -1,9 +1,6 @@
 import { v, ConvexError } from "convex/values"
-import {
-  action,
-  internalAction,
-  type ActionCtx,
-} from "./_generated/server"
+import { action, internalAction } from "./_generated/server"
+import type { ActionCtx } from "./_generated/server"
 import { internal, components } from "./_generated/api"
 import { parsePhoneNumberFromString } from "libphonenumber-js/min"
 import { RateLimiter, MINUTE, HOUR, DAY } from "@convex-dev/rate-limiter"
@@ -11,6 +8,7 @@ import { RateLimiter, MINUTE, HOUR, DAY } from "@convex-dev/rate-limiter"
 const MAKE_BK_WEBHOOK_URL = process.env.MAKE_BK_WEBHOOK_URL
 const MAKE_SHARED_SECRET = process.env.MAKE_SHARED_SECRET
 const VAPI_API = "https://api.vapi.ai"
+const META_GRAPH_API = "https://graph.facebook.com/v21.0"
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, {
   // Per phone: 50 / day, burst of 20.
@@ -113,6 +111,36 @@ export const submit = action({
       address: trimmedAddress,
       service: trimmedService,
     })
+
+    // 4) Fire Meta CAPI Lead event. Browser pixel fires the same event with the
+    //    same event_id so Meta dedupes; CAPI recovers events lost to ad blockers
+    //    and iOS 14 ATT. Failure here must not break the booking flow.
+    try {
+      const capiResult = await sendCapiLead({
+        eventId: leadId,
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: e164,
+        zip: trimmedZip,
+        service: trimmedService,
+      })
+      if (!capiResult.ok) {
+        await ctx.runMutation(internal.events.record, {
+          kind: "meta_capi_failed",
+          severity: "warn",
+          message: `Meta CAPI Lead failed: ${capiResult.error}`,
+          leadId,
+        })
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      await ctx.runMutation(internal.events.record, {
+        kind: "meta_capi_failed",
+        severity: "warn",
+        message: `Meta CAPI Lead threw: ${message.slice(0, 300)}`,
+        leadId,
+      })
+    }
 
     // 5) Kick off outbound Vapi call. Don't block the response on transient errors.
     try {
@@ -347,6 +375,85 @@ async function dispatchBooking(
     }
     return { ok: false, error }
   }
+}
+
+// ---------------------- Meta Conversions API ----------------------
+
+async function sha256Hex(input: string): Promise<string> {
+  const buf = new TextEncoder().encode(input)
+  const hash = await crypto.subtle.digest("SHA-256", buf)
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+}
+
+async function sendCapiLead(input: {
+  eventId: string
+  name: string
+  email: string
+  phone: string
+  zip: string
+  service: string
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const pixelId = process.env.META_PIXEL_ID
+  const accessToken = process.env.META_CAPI_ACCESS_TOKEN
+  if (!pixelId || !accessToken) {
+    return { ok: false, error: "META_PIXEL_ID or META_CAPI_ACCESS_TOKEN not set" }
+  }
+
+  const [firstName, ...rest] = input.name.trim().split(/\s+/)
+  const lastName = rest.join(" ")
+  const phoneDigits = input.phone.replace(/\D/g, "")
+
+  const [em, ph, fn, ln, zp, country] = await Promise.all([
+    sha256Hex(input.email.trim().toLowerCase()),
+    sha256Hex(phoneDigits),
+    sha256Hex(firstName.toLowerCase()),
+    lastName ? sha256Hex(lastName.toLowerCase()) : Promise.resolve(""),
+    sha256Hex(input.zip.trim()),
+    sha256Hex("us"),
+  ])
+
+  const eventSourceUrl = process.env.SITE_URL ?? "https://shalomcleans.com"
+
+  const payload = {
+    data: [
+      {
+        event_name: "Lead",
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: input.eventId,
+        action_source: "website",
+        event_source_url: eventSourceUrl,
+        user_data: {
+          em: [em],
+          ph: [ph],
+          fn: [fn],
+          ...(ln ? { ln: [ln] } : {}),
+          zp: [zp],
+          country: [country],
+        },
+        custom_data: {
+          content_name: "Booking Request",
+          content_category: input.service,
+        },
+      },
+    ],
+  }
+
+  const res = await fetch(
+    `${META_GRAPH_API}/${pixelId}/events?access_token=${encodeURIComponent(accessToken)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+  )
+
+  if (!res.ok) {
+    const body = await res.text()
+    return { ok: false, error: `Meta returned ${res.status}: ${body.slice(0, 300)}` }
+  }
+  return { ok: true }
 }
 
 async function hmacSha256Hex(secret: string, payload: string): Promise<string> {
