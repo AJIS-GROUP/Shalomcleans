@@ -1,14 +1,16 @@
 import { Link } from '@tanstack/react-router'
 import { Menu, X, Sparkles } from 'lucide-react'
 import { useState } from 'react'
-import { BOOK_URL, CONTACT_URL } from '../../lib/booking-urls'
+import { CONTACT_URL } from '../../lib/booking-urls'
 import { useMountEffect } from '../../lib/useMountEffect'
+import { BookNowLink } from '../ui/BookNowLink'
 
 type NavLink = {
   label: string
   to?: string
   href?: string
   primary?: boolean
+  bookNow?: boolean
 }
 
 const navLinks: NavLink[] = [
@@ -17,7 +19,7 @@ const navLinks: NavLink[] = [
   { label: 'About', to: '/#about' },
   { label: 'Reviews', to: '/#reviews' },
   { label: 'Contact', href: CONTACT_URL },
-  { label: 'Book Now', href: BOOK_URL, primary: true },
+  { label: 'Book Now', primary: true, bookNow: true },
 ]
 
 const linkClass = (primary?: boolean) =>
@@ -33,10 +35,22 @@ const renderLinkInner = (link: NavLink) => (
   </>
 )
 
-const NavLinks = ({ onLinkClick }: { onLinkClick?: () => void }) => (
+const NavLinks = ({ surface, onLinkClick }: { surface: string; onLinkClick?: () => void }) => (
   <>
-    {navLinks.map((link) =>
-      link.href ? (
+    {navLinks.map((link) => {
+      if (link.bookNow) {
+        return (
+          <BookNowLink
+            key={link.label}
+            surface={surface}
+            onClick={onLinkClick}
+            className={linkClass(link.primary)}
+          >
+            {renderLinkInner(link)}
+          </BookNowLink>
+        )
+      }
+      return link.href ? (
         <a
           key={link.label}
           href={link.href}
@@ -57,7 +71,7 @@ const NavLinks = ({ onLinkClick }: { onLinkClick?: () => void }) => (
           {renderLinkInner(link)}
         </Link>
       )
-    )}
+    })}
   </>
 )
 
@@ -102,7 +116,7 @@ export const Header = () => {
           <Logo withWordmark />
 
           <div className="hidden md:flex items-center gap-5">
-            <NavLinks />
+            <NavLinks surface="header-desktop" />
           </div>
 
           <button
@@ -125,19 +139,17 @@ export const Header = () => {
         <Logo />
 
         <div className="hidden md:flex items-center gap-4">
-          <NavLinks />
+          <NavLinks surface="header-pill-desktop" />
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
-          <a
-            href={BOOK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <BookNowLink
+            surface="header-pill-mobile"
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-obsidian dark:bg-pristine text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-md shadow-obsidian/10 dark:shadow-white/10 active:scale-95 transition-transform duration-150"
           >
             <Sparkles size={11} className="opacity-80" />
             Book Now
-          </a>
+          </BookNowLink>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 text-obsidian dark:text-white hover:bg-obsidian/5 dark:hover:bg-white/10 rounded-full transition-colors"
@@ -154,17 +166,33 @@ export const Header = () => {
           }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-8">
-          {navLinks.map((link, i) =>
-            link.href ? (
+          {navLinks.map((link, i) => {
+            const itemClass = `text-3xl font-display font-medium text-obsidian dark:text-white ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`
+            const itemStyle = { transitionDelay: `${i * 100}ms` }
+            const close = () => setIsMenuOpen(false)
+            if (link.bookNow) {
+              return (
+                <BookNowLink
+                  key={link.label}
+                  surface="mobile-menu"
+                  onClick={close}
+                  className={itemClass}
+                  style={itemStyle}
+                >
+                  {link.label}
+                </BookNowLink>
+              )
+            }
+            return link.href ? (
               <a
                 key={link.label}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => setIsMenuOpen(false)}
-                className={`text-3xl font-display font-medium text-obsidian dark:text-white ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-                  }`}
-                style={{ transitionDelay: `${i * 100}ms` }}
+                onClick={close}
+                className={itemClass}
+                style={itemStyle}
               >
                 {link.label}
               </a>
@@ -172,15 +200,14 @@ export const Header = () => {
               <Link
                 key={link.label}
                 to={link.to}
-                onClick={() => setIsMenuOpen(false)}
-                className={`text-3xl font-display font-medium text-obsidian dark:text-white ${isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-                  }`}
-                style={{ transitionDelay: `${i * 100}ms` }}
+                onClick={close}
+                className={itemClass}
+                style={itemStyle}
               >
                 {link.label}
               </Link>
             )
-          )}
+          })}
         </div>
       </div>
     </>

@@ -2,7 +2,7 @@ import { useRef } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import { Sparkles } from "lucide-react"
 import { BookingForm } from "./BookingForm"
-import { BOOK_URL } from "../../lib/booking-urls"
+import { BookNowLink } from "../ui/BookNowLink"
 
 export const Hero = () => {
   const navigate = useNavigate()
@@ -54,14 +54,12 @@ export const Hero = () => {
             </button>
 
             {/* Mobile Button */}
-            <a
-              href={BOOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <BookNowLink
+              surface="hero-mobile"
               className="inline-flex md:hidden items-center gap-2 px-5 py-2.5 rounded-full bg-obsidian dark:bg-pristine text-[10px] uppercase tracking-[0.2em] font-bold text-white dark:text-obsidian shadow-lg shadow-obsidian/20 dark:shadow-white/10 active:scale-95 transition-transform duration-150"
             >
               Book Now
-            </a>
+            </BookNowLink>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-display font-medium tracking-tighter leading-[0.9] text-balance text-obsidian dark:text-white">
