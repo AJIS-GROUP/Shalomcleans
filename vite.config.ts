@@ -9,12 +9,12 @@ import { nitro } from 'nitro/vite'
 
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https://*.vapi.ai https://*.convex.site https://*.convex.cloud",
-  "connect-src 'self' https://*.convex.cloud https://*.convex.site https://api.vapi.ai wss://*.convex.cloud",
+  "connect-src 'self' https://*.convex.cloud https://*.convex.site https://api.vapi.ai wss://*.convex.cloud https://www.facebook.com https://connect.facebook.net",
   "frame-src 'self' https://www.instagram.com https://instagram.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
