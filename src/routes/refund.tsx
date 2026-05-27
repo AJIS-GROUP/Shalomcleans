@@ -4,11 +4,11 @@ import { LegalLayout, LegalSection } from "../components/layout/LegalLayout"
 export const Route = createFileRoute("/refund")({
   head: () => ({
     meta: [
-      { title: "Refund Policy | Shalom Cleans" },
+      { title: "Refund Policy | Shalomcleans" },
       {
         name: "description",
         content:
-          "How Shalom Cleans handles refunds, satisfaction concerns, cancellations, and deposits.",
+          "How Shalomcleans handles refunds, satisfaction concerns, cancellations, and deposits.",
       },
     ],
   }),
@@ -20,7 +20,7 @@ function RefundPage() {
     <LegalLayout title="Refund Policy" effectiveDate="May 27, 2026">
       <LegalSection title="Our commitment">
         <p>
-          At <strong>Shalom Cleans</strong>, we are committed to providing
+          At <strong>Shalomcleans</strong>, we are committed to providing
           professional cleaning services with quality and care. By booking our
           services, you agree to the following refund policy.
         </p>
@@ -28,7 +28,7 @@ function RefundPage() {
 
       <LegalSection title="1. No refund policy">
         <p>
-          All services provided by Shalom Cleans are considered final and
+          All services provided by Shalomcleans are considered final and
           non-refundable once the cleaning service has been completed.
         </p>
         <p>
@@ -53,7 +53,7 @@ function RefundPage() {
       </LegalSection>
 
       <LegalSection title="3. Conditions not eligible for refund">
-        <p>Shalom Cleans will not issue refunds for:</p>
+        <p>Shalomcleans will not issue refunds for:</p>
         <ul className="list-disc pl-6 space-y-1">
           <li>Pre-existing damage, stains, discoloration, mold, odors, rust, or permanent buildup</li>
           <li>Areas not included in the agreed cleaning package</li>
@@ -91,7 +91,7 @@ function RefundPage() {
 
       <LegalSection title="6. Right to refuse service">
         <p>
-          Shalom Cleans reserves the right to refuse or stop service at any
+          Shalomcleans reserves the right to refuse or stop service at any
           time if conditions are unsafe, unsanitary beyond normal expectations,
           or if staff experiences harassment, threats, or inappropriate
           behavior.
@@ -101,7 +101,7 @@ function RefundPage() {
       <LegalSection title="7. Chargebacks">
         <p>
           Clients agree not to initiate chargebacks without first contacting
-          Shalom Cleans to resolve concerns. Fraudulent or unjustified
+          Shalomcleans to resolve concerns. Fraudulent or unjustified
           chargebacks may result in collections action and denial of future
           services.
         </p>
@@ -109,14 +109,14 @@ function RefundPage() {
 
       <LegalSection title="8. Policy acceptance">
         <p>
-          By booking a service with Shalom Cleans, the client acknowledges and
+          By booking a service with Shalomcleans, the client acknowledges and
           agrees to this Refund Policy in full.
         </p>
       </LegalSection>
 
       <LegalSection title="Contact">
         <p>
-          Shalom Cleans
+          Shalomcleans
           <br />
           Email:{" "}
           <a

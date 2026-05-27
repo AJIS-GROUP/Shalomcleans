@@ -40,7 +40,7 @@ function LoginPage() {
             S
           </div>
           <div>
-            <div className="font-display text-xl">Shalom Cleans</div>
+            <div className="font-display text-xl">Shalomcleans</div>
             <div className="text-xs text-white/40">Admin console</div>
           </div>
         </div>

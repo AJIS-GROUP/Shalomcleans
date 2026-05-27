@@ -70,7 +70,7 @@ function DesktopOnlyNotice() {
         Desktop only
       </h1>
       <p className="text-white/50 max-w-sm text-sm leading-relaxed">
-        The Shalom Cleans admin console is designed for wider screens. Please
+        The Shalomcleans admin console is designed for wider screens. Please
         open this on a desktop or expand your browser window to at least
         1024&nbsp;px wide.
       </p>

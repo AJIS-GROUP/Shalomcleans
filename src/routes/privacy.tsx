@@ -4,11 +4,11 @@ import { LegalLayout, LegalSection } from "../components/layout/LegalLayout"
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy | Shalom Cleans" },
+      { title: "Privacy Policy | Shalomcleans" },
       {
         name: "description",
         content:
-          "How Shalom Cleans collects, uses, and protects your personal information when you request a quote or book a cleaning.",
+          "How Shalomcleans collects, uses, and protects your personal information when you request a quote or book a cleaning.",
       },
     ],
   }),
@@ -20,18 +20,18 @@ function PrivacyPage() {
     <LegalLayout title="Privacy Policy" effectiveDate="May 27, 2026">
       <LegalSection title="Who we are">
         <p>
-          Shalom Cleans is a residential cleaning service operating in the Atlanta
-          metropolitan area. This Privacy Policy describes how we collect, use, and
-          share personal information when you visit{" "}
+          Shalomcleans is a Residential and Commercial cleaning services provider
+          operating in the Atlanta metropolitan area. This Privacy Policy describes
+          how we collect, use, and share personal information when you visit{" "}
           <strong>shalomcleans.com</strong>, request a quote, or book a service.
         </p>
         <p>
           If you have any questions about this policy or your data, contact us at{" "}
           <a
-            href="mailto:hello@shalomcleans.com"
+            href="mailto:Shalomcleans@gmail.com"
             className="underline hover:text-obsidian dark:hover:text-white"
           >
-            hello@shalomcleans.com
+            Shalomcleans@gmail.com
           </a>
           .
         </p>
@@ -177,10 +177,10 @@ function PrivacyPage() {
         <p>
           To exercise any of these rights, email us at{" "}
           <a
-            href="mailto:hello@shalomcleans.com"
+            href="mailto:Shalomcleans@gmail.com"
             className="underline hover:text-obsidian dark:hover:text-white"
           >
-            hello@shalomcleans.com
+            Shalomcleans@gmail.com
           </a>{" "}
           and we will respond within 30 days.
         </p>
@@ -218,15 +218,24 @@ function PrivacyPage() {
           Questions, requests, or complaints about this policy can be sent to:
         </p>
         <p>
-          Shalom Cleans
+          Shalomcleans
           <br />
           Atlanta, GA
           <br />
+          Email:{" "}
           <a
-            href="mailto:hello@shalomcleans.com"
+            href="mailto:Shalomcleans@gmail.com"
             className="underline hover:text-obsidian dark:hover:text-white"
           >
-            hello@shalomcleans.com
+            Shalomcleans@gmail.com
+          </a>
+          <br />
+          Phone:{" "}
+          <a
+            href="tel:+14706938192"
+            className="underline hover:text-obsidian dark:hover:text-white"
+          >
+            470-693-8192
           </a>
         </p>
       </LegalSection>

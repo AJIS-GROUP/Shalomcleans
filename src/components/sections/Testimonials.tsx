@@ -16,7 +16,7 @@ export const Testimonials = () => {
     {
       author: "Oke Ogheneroro David",
       role: "2 weeks ago",
-      content: "I don't usually write reviews, but I had to for Shalom Cleans. They came through and honestly exceeded my expectations. Very professional, on time, and the attention to detail was impressive. You can tell they actually care about the work they do and not just rushing to finish. I definitely recommend them.",
+      content: "I don't usually write reviews, but I had to for Shalomcleans. They came through and honestly exceeded my expectations. Very professional, on time, and the attention to detail was impressive. You can tell they actually care about the work they do and not just rushing to finish. I definitely recommend them.",
       rating: 5,
     },
     {
@@ -34,7 +34,7 @@ export const Testimonials = () => {
           eyebrow="Google Reviews"
           title="Five-star"
           titleItalic="service."
-          description="Don't take our word for it — here's what Atlanta homeowners have to say about Shalom Cleans on Google."
+          description="Don't take our word for it — here's what Atlanta homeowners have to say about Shalomcleans on Google."
         />
 
         {/* Rating summary */}

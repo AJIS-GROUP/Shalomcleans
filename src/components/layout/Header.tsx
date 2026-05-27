@@ -80,7 +80,7 @@ const Logo = ({ withWordmark }: { withWordmark?: boolean }) => (
     <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
       <img
         src="/shalomcleans.webp"
-        alt="Shalom Cleans Logo"
+        alt="Shalomcleans Logo"
         width="40"
         height="40"
         className="w-full h-full brightness-0 dark:invert object-contain"
@@ -88,7 +88,7 @@ const Logo = ({ withWordmark }: { withWordmark?: boolean }) => (
     </div>
     {withWordmark && (
       <span className="font-display font-semibold tracking-tight text-obsidian dark:text-white text-sm uppercase">
-        Shalom Cleans
+        Shalomcleans
       </span>
     )}
   </Link>

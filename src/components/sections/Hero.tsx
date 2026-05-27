@@ -46,11 +46,11 @@ export const Hero = () => {
             <button
               type="button"
               onClick={handleSecretClick}
-              aria-label="Shalom Cleans signature mark"
+              aria-label="Shalomcleans signature mark"
               className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/5 dark:bg-white/5 border border-obsidian/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-obsidian dark:text-white cursor-default select-none"
             >
               <Sparkles size={12} className="text-obsidian/60 dark:text-white/60" />
-              Premium Residential Cleaning
+              Residential & Commercial Cleaning
             </button>
 
             {/* Mobile Button */}

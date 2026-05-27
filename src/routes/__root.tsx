@@ -30,7 +30,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Shalom Cleans | Boutique Cleaning Rituals & Restoration',
+        title: 'Shalomcleans | Boutique Cleaning Rituals & Restoration',
       },
       {
         name: 'description',
@@ -38,7 +38,7 @@ export const Route = createRootRoute({
       },
       {
         property: 'og:title',
-        content: 'Shalom Cleans | Boutique Cleaning Rituals & Restoration',
+        content: 'Shalomcleans | Boutique Cleaning Rituals & Restoration',
       },
       {
         property: 'og:description',
@@ -58,7 +58,7 @@ export const Route = createRootRoute({
       },
       {
         name: 'twitter:title',
-        content: 'Shalom Cleans | Boutique Cleaning Rituals & Restoration',
+        content: 'Shalomcleans | Boutique Cleaning Rituals & Restoration',
       },
       {
         name: 'twitter:description',
@@ -70,7 +70,7 @@ export const Route = createRootRoute({
       },
       {
         name: 'keywords',
-        content: 'luxury cleaning, residential cleaning, boutique cleaning rituals, organic home restoration, shalom cleans, pristine homes',
+        content: 'luxury cleaning, residential cleaning, commercial cleaning, boutique cleaning rituals, organic home restoration, shalomcleans, pristine homes',
       },
       {
         name: 'facebook-domain-verification',

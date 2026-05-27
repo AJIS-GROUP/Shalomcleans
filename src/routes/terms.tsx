@@ -4,11 +4,11 @@ import { LegalLayout, LegalSection } from "../components/layout/LegalLayout"
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms & Conditions | Shalom Cleans" },
+      { title: "Terms & Conditions | Shalomcleans" },
       {
         name: "description",
         content:
-          "The terms and conditions that govern your use of Shalom Cleans' website and cleaning services.",
+          "The terms and conditions that govern your use of Shalomcleans' website and cleaning services.",
       },
     ],
   }),
@@ -20,9 +20,10 @@ function TermsPage() {
     <LegalLayout title="Terms & Conditions" effectiveDate="May 27, 2026">
       <LegalSection title="Welcome">
         <p>
-          Welcome to <strong>Shalom Cleans</strong>. These Terms &amp; Conditions
-          govern the use of our services and website. By booking or using our
-          services, you agree to all terms outlined below.
+          Welcome to <strong>Shalomcleans</strong>. These Terms &amp; Conditions
+          govern the use of Shalomcleans' Residential and Commercial cleaning
+          services and website. By booking or using Shalomcleans' services, you
+          agree to all terms outlined below.
         </p>
       </LegalSection>
 
@@ -45,7 +46,7 @@ function TermsPage() {
           <li>Additional rooms, areas, or services are requested</li>
         </ul>
         <p>
-          Shalom Cleans reserves the right to adjust pricing upon arrival if
+          Shalomcleans reserves the right to adjust pricing upon arrival if
           necessary.
         </p>
       </LegalSection>
@@ -71,13 +72,13 @@ function TermsPage() {
           <li>Informing us of pets, hazards, or special cleaning conditions beforehand</li>
         </ul>
         <p>
-          Shalom Cleans is not responsible for damage to improperly secured
+          Shalomcleans is not responsible for damage to improperly secured
           items.
         </p>
       </LegalSection>
 
       <LegalSection title="5. Limitation of liability">
-        <p>Shalom Cleans is not liable for:</p>
+        <p>Shalomcleans is not liable for:</p>
         <ul className="list-disc pl-6 space-y-1">
           <li>Pre-existing damage</li>
           <li>Wear and tear</li>
@@ -108,7 +109,7 @@ function TermsPage() {
 
       <LegalSection title="7. Photos & marketing">
         <p>
-          Shalom Cleans may take before-and-after photos for quality control,
+          Shalomcleans may take before-and-after photos for quality control,
           training, and marketing purposes. Personal or identifying information
           will not be shared publicly without consent.
         </p>
@@ -117,14 +118,14 @@ function TermsPage() {
       <LegalSection title="8. Intellectual property">
         <p>
           All content, branding, logos, designs, and materials belonging to
-          Shalom Cleans are protected and may not be copied or reproduced
+          Shalomcleans are protected and may not be copied or reproduced
           without written permission.
         </p>
       </LegalSection>
 
       <LegalSection title="9. Service guarantee disclaimer">
         <p>
-          While we strive for excellent results, Shalom Cleans does not
+          While we strive for excellent results, Shalomcleans does not
           guarantee complete removal of all stains, odors, buildup, or damage
           due to material condition, age, or previous neglect.
         </p>
@@ -146,7 +147,7 @@ function TermsPage() {
 
       <LegalSection title="11. Changes to policies">
         <p>
-          Shalom Cleans reserves the right to update or modify these terms at
+          Shalomcleans reserves the right to update or modify these terms at
           any time without prior notice.
         </p>
       </LegalSection>
@@ -160,7 +161,7 @@ function TermsPage() {
 
       <LegalSection title="13. Contact information">
         <p>
-          Shalom Cleans
+          Shalomcleans
           <br />
           Email:{" "}
           <a
