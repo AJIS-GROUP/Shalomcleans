@@ -65,6 +65,10 @@ export const Route = createRootRoute({
         name: 'keywords',
         content: 'luxury cleaning, residential cleaning, boutique cleaning rituals, organic home restoration, shalom cleans, pristine homes',
       },
+      {
+        name: 'facebook-domain-verification',
+        content: '36smd5il70rv7dx4wu9cw8u42au1db',
+      },
     ],
     links: [
       {
