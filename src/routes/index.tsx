@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Hero } from '../components/sections/Hero'
+import { Services } from '../components/sections/Services'
 import { RecurringPlans } from '../components/sections/RecurringPlans'
 import { Testimonials } from '../components/sections/Testimonials'
 import { Process } from '../components/sections/Process'
@@ -15,6 +16,7 @@ function Home() {
   return (
     <div>
       <Hero />
+      <Services />
       <RecurringPlans />
       <Testimonials />
       <Process />
