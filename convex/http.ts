@@ -8,34 +8,9 @@ const http = httpRouter()
 authComponent.registerRoutes(http, createAuth)
 
 const VAPI_SERVER_SECRET = process.env.VAPI_SERVER_SECRET
+const BOOKING_KOALA_URL = "https://shalomcleans.bookingkoala.com/booknow"
 
-const ALLOWED_BOOKING_KEYS = new Set([
-  "firstName",
-  "lastName",
-  "email",
-  "phone",
-  "address",
-  "city",
-  "state",
-  "zip",
-  "country",
-  "service",
-  "preferredDateTime",
-  "notes",
-])
-const MAX_STR = 500
-
-function sanitizeBookingArgs(raw: Record<string, unknown>): Record<string, string> {
-  const out: Record<string, string> = {}
-  for (const [k, v] of Object.entries(raw)) {
-    if (!ALLOWED_BOOKING_KEYS.has(k)) continue
-    if (typeof v !== "string") continue
-    const cleaned = v.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").slice(0, MAX_STR)
-    if (cleaned.length === 0) continue
-    out[k] = cleaned
-  }
-  return out
-}
+const MAX_NOTES = 500
 
 type VapiToolCall = {
   id: string
@@ -75,37 +50,53 @@ http.route({
       const results = []
 
       for (const tc of calls) {
-        if (tc.function?.name !== "bookAppointment") {
+        if (tc.function?.name !== "confirmBookingEmail") {
           results.push({ toolCallId: tc.id, result: "Unknown tool" })
           continue
         }
-
-        const rawArgs = (tc.function?.arguments ?? {}) as Record<string, unknown>
-        const safeArgs = sanitizeBookingArgs(rawArgs)
-        const bookingPayload = {
-          ...safeArgs,
-          country: safeArgs.country ?? "USA",
-          source: "Vapi",
-          callId,
+        if (!callId) {
+          results.push({
+            toolCallId: tc.id,
+            result: "Missing call id — cannot link to a lead.",
+          })
+          continue
         }
+
+        const args = (tc.function?.arguments ?? {}) as Record<string, unknown>
+        const rawNotes = typeof args.notes === "string" ? args.notes : ""
+        const notes = rawNotes
+          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+          .slice(0, MAX_NOTES)
 
         await ctx.runMutation(internal.events.record, {
           kind: "vapi_tool_call",
           severity: "info",
-          message: "Vapi assistant invoked bookAppointment",
+          message: "Vapi assistant invoked confirmBookingEmail",
           vapiCallId: callId,
-          data: { args: safeArgs },
+          data: { notes: notes.slice(0, 200) },
         })
 
-        await ctx.scheduler.runAfter(0, internal.bookings.sendToMake, {
-          payload: bookingPayload,
-          vapiCallId: callId,
+        const leadId = await ctx.runMutation(
+          internal.leads.markConfirmedByVapiCallId,
+          { vapiCallId: callId, notes: notes || undefined },
+        )
+
+        if (!leadId) {
+          results.push({
+            toolCallId: tc.id,
+            result: "Lead not found for this call.",
+          })
+          continue
+        }
+
+        await ctx.scheduler.runAfter(0, internal.email.sendBookingEmail, {
+          leadId,
         })
 
         results.push({
           toolCallId: tc.id,
           result:
-            "Booking received. Our team will confirm the details with you shortly.",
+            "Confirmed. The booking link email is on its way to the customer.",
         })
       }
 
@@ -141,9 +132,61 @@ http.route({
   }),
 })
 
+// Per-lead booking link redirect. Resolves the click token, marks the lead
+// as link_clicked, then 302s to BookingKoala. Failures still redirect so the
+// customer is never left staring at an error page.
+http.route({
+  path: "/r/book",
+  method: "GET",
+  handler: httpAction(async (ctx, req) => {
+    return await handleBookingClick(ctx, req)
+  }),
+})
+
+http.route({
+  pathPrefix: "/r/book/",
+  method: "GET",
+  handler: httpAction(async (ctx, req) => {
+    return await handleBookingClick(ctx, req)
+  }),
+})
+
+async function handleBookingClick(
+  ctx: Parameters<Parameters<typeof httpAction>[0]>[0],
+  req: Request,
+): Promise<Response> {
+  const url = new URL(req.url)
+  // Token is everything after /r/book/.
+  const tokenMatch = url.pathname.match(/\/r\/book\/([^/]+)/)
+  const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : ""
+
+  if (!token || token.length > 128 || !/^[A-Za-z0-9_-]+$/.test(token)) {
+    return Response.redirect(BOOKING_KOALA_URL, 302)
+  }
+
+  const lead = await ctx.runQuery(internal.email.getLeadByToken, { token })
+  if (!lead) {
+    return Response.redirect(BOOKING_KOALA_URL, 302)
+  }
+
+  const ip =
+    req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    undefined
+  const userAgent = req.headers.get("user-agent") ?? undefined
+
+  await ctx.runMutation(internal.email.markLinkClicked, {
+    leadId: lead._id,
+    ip,
+    userAgent,
+  })
+
+  return Response.redirect(BOOKING_KOALA_URL, 302)
+}
+
 function mapEndReason(
   reason: string,
-): "booked" | "declined" | "no_answer" | "failed" | "calling" {
+): "declined" | "no_answer" | "failed" | "calling" {
   const r = reason.toLowerCase()
   if (r.includes("customer-ended-call") || r.includes("assistant-ended-call")) {
     return "calling"

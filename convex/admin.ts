@@ -1,5 +1,6 @@
 import { v } from "convex/values"
-import { query } from "./_generated/server"
+import { action, query } from "./_generated/server"
+import { internal } from "./_generated/api"
 import { requireAdmin } from "./auth"
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
@@ -67,6 +68,9 @@ const optionalStatus = v.optional(
     v.literal("all"),
     v.literal("pending"),
     v.literal("calling"),
+    v.literal("confirmed"),
+    v.literal("email_sent"),
+    v.literal("link_clicked"),
     v.literal("booked"),
     v.literal("declined"),
     v.literal("no_answer"),
@@ -201,6 +205,9 @@ const leadStatusFilter = v.union(
   v.literal("all"),
   v.literal("pending"),
   v.literal("calling"),
+  v.literal("confirmed"),
+  v.literal("email_sent"),
+  v.literal("link_clicked"),
   v.literal("booked"),
   v.literal("declined"),
   v.literal("no_answer"),
@@ -249,5 +256,13 @@ export const listBookings = query({
       .withIndex("by_status", (q) => q.eq("status", "booked"))
       .order("desc")
       .take(limit)
+  },
+})
+
+export const resendBookingEmail = action({
+  args: { leadId: v.id("leads") },
+  handler: async (ctx, { leadId }): Promise<{ ok: boolean; error?: string; messageId?: string }> => {
+    await requireAdmin(ctx)
+    return await ctx.runAction(internal.email.sendBookingEmail, { leadId })
   },
 })

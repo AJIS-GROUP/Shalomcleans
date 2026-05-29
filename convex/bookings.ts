@@ -1,12 +1,9 @@
 import { v, ConvexError } from "convex/values"
-import { action, internalAction } from "./_generated/server"
-import type { ActionCtx } from "./_generated/server"
+import { action } from "./_generated/server"
 import { internal, components } from "./_generated/api"
 import { parsePhoneNumberFromString } from "libphonenumber-js/min"
 import { RateLimiter, MINUTE, HOUR, DAY } from "@convex-dev/rate-limiter"
 
-const MAKE_BK_WEBHOOK_URL = process.env.MAKE_BK_WEBHOOK_URL
-const MAKE_SHARED_SECRET = process.env.MAKE_SHARED_SECRET
 const VAPI_API = "https://api.vapi.ai"
 const META_GRAPH_API = "https://graph.facebook.com/v21.0"
 
@@ -20,10 +17,6 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   // Generic fallback so the limit refills slowly.
   _hourly: { kind: "fixed window", rate: 5000, period: HOUR },
 })
-
-type DispatchResult =
-  | { ok: true; bookingId?: string }
-  | { ok: false; error: string }
 
 // ---------------------- Public booking submission ----------------------
 
@@ -200,7 +193,7 @@ function buildFirstMessage(c: CustomerInfo): string {
   const first = c.name.split(/\s+/)[0] || "there"
   return (
     `Hi ${first}, this is Sarah from Shalom Cleans calling about your ${c.service} cleaning request. ` +
-    `Is this a good time to lock in the details?`
+    `Is this a good time to confirm a couple of details?`
   )
 }
 
@@ -212,7 +205,7 @@ function buildSystemPrompt(c: CustomerInfo): string {
   return [
     "You are Sarah, a warm and concise booking assistant for Shalom Cleans, a residential cleaning service in the United States.",
     "",
-    "The customer just submitted a booking request on our website. You are returning the call to confirm the details and schedule the appointment.",
+    "The customer just submitted a booking request on our website. You are returning the call to CONFIRM their intent. You do NOT schedule the appointment yourself — after you confirm, the customer will receive an email with a link to pick their preferred time and complete the booking.",
     "",
     "Customer info already on file (do NOT ask them to repeat these — confirm only):",
     `- Name: ${c.name}`,
@@ -221,20 +214,23 @@ function buildSystemPrompt(c: CustomerInfo): string {
     `- Service requested: ${c.service} cleaning`,
     `- Address: ${fullAddress}`,
     "",
-    "Your job:",
-    "1. Greet them by first name and confirm the service + address.",
-    "2. Ask for a preferred date and 2-hour time window.",
-    "3. Ask if there are any special instructions (pets, gate codes, problem areas).",
-    "4. Once date/time is agreed, call the `bookAppointment` tool with all collected fields:",
-    `   firstName, lastName, email, phone, address, city, state, zip, service, preferredDateTime, notes.`,
-    "   The address/contact fields above are already verified — pass them through verbatim.",
-    "5. Confirm the booking back to them and end the call warmly.",
+    "Your job, in order:",
+    "1. Greet them by first name and ask if it's a good time to talk for a minute.",
+    "2. Confirm the service and the address out loud — wait for a yes.",
+    "3. Ask if there are any special instructions for the cleaning team (pets, gate codes, problem areas, parking).",
+    "4. Once they've confirmed and shared any notes, call the `confirmBookingEmail` tool with a single `notes` field (a short summary of any special instructions, or an empty string if there are none).",
+    "5. After the tool returns, tell the customer: \"Perfect. I'm sending you an email right now with a link to complete your booking — you'll just tap it, pick your time, and you're all set. It should land in your inbox in the next minute or so.\" Then thank them and end the call warmly.",
+    "",
+    "Important rules:",
+    "- Never promise a specific date or time — the customer picks that on the link.",
+    "- Never quote prices.",
+    "- The email link is required to finalize the booking. Make this clear without being pushy.",
+    "- If they decline or hesitate, offer to send the email anyway so they can complete it when they're ready, then call `confirmBookingEmail` and end politely.",
+    "- If they explicitly refuse to receive the email, do NOT call the tool — end the call politely.",
     "",
     "Style:",
     "- Speak naturally, no lists or bullet points out loud.",
     "- One short question at a time.",
-    "- If they hesitate or need to check their schedule, offer to follow up by text/email and end politely.",
-    "- Never invent prices or guarantee a specific cleaner — say our team will confirm.",
   ].join("\n")
 }
 
@@ -305,76 +301,6 @@ async function startOutboundCall(input: {
   }
   const json = (await res.json()) as { id?: string }
   return { skipped: false, callId: json.id }
-}
-
-// ---------------------- Make.com dispatch (internal) ----------------------
-
-async function dispatchBooking(
-  ctx: ActionCtx,
-  payload: Record<string, unknown>,
-  vapiCallId: string | undefined,
-): Promise<DispatchResult> {
-  if (!MAKE_BK_WEBHOOK_URL) {
-    const error = "MAKE_BK_WEBHOOK_URL not set"
-    if (vapiCallId) {
-      await ctx.runMutation(internal.leads.queuePendingBooking, {
-        vapiCallId,
-        payload,
-        lastError: error,
-      })
-    }
-    return { ok: false, error }
-  }
-
-  const headers: Record<string, string> = { "Content-Type": "application/json" }
-  const ts = Math.floor(Date.now() / 1000).toString()
-  const body = JSON.stringify(payload)
-  if (MAKE_SHARED_SECRET) {
-    headers["x-shared-secret"] = MAKE_SHARED_SECRET
-    headers["x-timestamp"] = ts
-    headers["x-signature"] = await hmacSha256Hex(MAKE_SHARED_SECRET, `${ts}.${body}`)
-  }
-
-  try {
-    const res = await fetch(MAKE_BK_WEBHOOK_URL, { method: "POST", headers, body })
-    if (!res.ok) throw new Error(`Make returned ${res.status}`)
-
-    const text = await res.text()
-    let bookingId: string | undefined
-    try {
-      const json = JSON.parse(text) as { id?: string; bookingId?: string }
-      bookingId = json.bookingId ?? json.id
-    } catch {
-      // plain-text response is acceptable
-    }
-
-    if (vapiCallId) {
-      await ctx.runMutation(internal.leads.markBooked, {
-        vapiCallId,
-        bookingKoalaId: bookingId,
-      })
-    } else {
-      await ctx.runMutation(internal.events.record, {
-        kind: "make_dispatch_success",
-        severity: "success",
-        message: bookingId
-          ? `Make dispatched booking (BK ${bookingId})`
-          : "Make dispatched booking",
-        data: { bookingId },
-      })
-    }
-    return { ok: true, bookingId }
-  } catch (err) {
-    const error = err instanceof Error ? err.message : String(err)
-    if (vapiCallId) {
-      await ctx.runMutation(internal.leads.queuePendingBooking, {
-        vapiCallId,
-        payload,
-        lastError: error,
-      })
-    }
-    return { ok: false, error }
-  }
 }
 
 // ---------------------- Meta Conversions API ----------------------
@@ -456,43 +382,3 @@ async function sendCapiLead(input: {
   return { ok: true }
 }
 
-async function hmacSha256Hex(secret: string, payload: string): Promise<string> {
-  const enc = new TextEncoder()
-  const key = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  )
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(payload))
-  return Array.from(new Uint8Array(sig))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-}
-
-export const sendToMake = internalAction({
-  args: {
-    payload: v.any(),
-    vapiCallId: v.optional(v.string()),
-  },
-  handler: async (ctx, { payload, vapiCallId }): Promise<DispatchResult> => {
-    return await dispatchBooking(ctx, payload, vapiCallId)
-  },
-})
-
-export const retryPending = internalAction({
-  args: {},
-  handler: async (ctx): Promise<{ processed: number }> => {
-    const pending = await ctx.runQuery(internal.leads.listPendingBookings, {})
-    for (const lead of pending) {
-      if (!lead.vapiCallId || !lead.pendingBookingPayload) continue
-      await dispatchBooking(
-        ctx,
-        lead.pendingBookingPayload as Record<string, unknown>,
-        lead.vapiCallId,
-      )
-    }
-    return { processed: pending.length }
-  },
-})

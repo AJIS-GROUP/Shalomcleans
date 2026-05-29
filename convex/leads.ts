@@ -82,7 +82,12 @@ export const getByVapiCallId = internalQuery({
   },
 })
 
-const TERMINAL: ReadonlyArray<"booked" | "declined"> = ["booked", "declined"]
+// Statuses that the post-call webhook should NOT regress to "calling".
+// Anything past the call itself — confirmation, email sent, click, booked,
+// declined — sticks.
+const TERMINAL: ReadonlyArray<
+  "confirmed" | "email_sent" | "link_clicked" | "booked" | "declined"
+> = ["confirmed", "email_sent", "link_clicked", "booked", "declined"]
 
 export const patchByVapiCallId = internalMutation({
   args: {
@@ -98,7 +103,7 @@ export const patchByVapiCallId = internalMutation({
       .first()
     if (!lead) return null
     const cleaned: Record<string, unknown> = {}
-    if (patch.status !== undefined && !TERMINAL.includes(lead.status as "booked" | "declined")) {
+    if (patch.status !== undefined && !TERMINAL.includes(lead.status as typeof TERMINAL[number])) {
       cleaned.status = patch.status
     }
     if (patch.bookingKoalaId !== undefined) {
@@ -169,6 +174,33 @@ export const queuePendingBooking = internalMutation({
       leadId: lead._id,
       vapiCallId,
       data: { attempts, lastError: lastError.slice(0, 500) },
+    })
+    return lead._id
+  },
+})
+
+export const markConfirmedByVapiCallId = internalMutation({
+  args: {
+    vapiCallId: v.string(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, { vapiCallId, notes }) => {
+    const lead = await ctx.db
+      .query("leads")
+      .withIndex("by_vapi_call", (q) => q.eq("vapiCallId", vapiCallId))
+      .first()
+    if (!lead) return null
+    if (TERMINAL.includes(lead.status as typeof TERMINAL[number])) return lead._id
+    const patch: Record<string, unknown> = { status: "confirmed" }
+    const cleaned = clampNotes(notes)
+    if (cleaned) patch.notes = cleaned
+    await ctx.db.patch(lead._id, patch)
+    await logEvent(ctx, {
+      kind: "booking_intent_confirmed",
+      severity: "info",
+      message: `Caller confirmed intent — queueing booking email`,
+      leadId: lead._id,
+      vapiCallId,
     })
     return lead._id
   },

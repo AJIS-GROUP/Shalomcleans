@@ -1,21 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
-import { useQuery } from "convex/react"
-import { Search, Users, Mail, Phone, MapPin, X } from "lucide-react"
+import { useAction, useQuery } from "convex/react"
+import { Search, Users, Mail, Phone, MapPin, X, Send, CheckCircle2 } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
-import type { Doc } from "../../../convex/_generated/dataModel"
+import type { Doc, Id } from "../../../convex/_generated/dataModel"
 import { Reveal } from "#/components/admin/Reveal"
 
 export const Route = createFileRoute("/admin/leads")({
   component: LeadsPage,
 })
 
-type Status = "all" | "pending" | "calling" | "booked" | "declined" | "no_answer" | "failed"
+type Status =
+  | "all"
+  | "pending"
+  | "calling"
+  | "confirmed"
+  | "email_sent"
+  | "link_clicked"
+  | "booked"
+  | "declined"
+  | "no_answer"
+  | "failed"
 
 const FILTERS: Array<{ key: Status; label: string }> = [
   { key: "all", label: "All" },
   { key: "pending", label: "Pending" },
   { key: "calling", label: "Calling" },
+  { key: "confirmed", label: "Confirmed" },
+  { key: "email_sent", label: "Email sent" },
+  { key: "link_clicked", label: "Link clicked" },
   { key: "booked", label: "Booked" },
   { key: "no_answer", label: "No answer" },
   { key: "declined", label: "Declined" },
@@ -211,6 +224,18 @@ function LeadDrawer({
             mono
           />
         )}
+        {lead.emailSentAt && (
+          <DetailRow
+            label="Email sent"
+            value={new Date(lead.emailSentAt).toLocaleString()}
+          />
+        )}
+        {lead.clickedAt && (
+          <DetailRow
+            label="Link clicked"
+            value={new Date(lead.clickedAt).toLocaleString()}
+          />
+        )}
         {lead.pendingAttempts ? (
           <DetailRow
             label="Pending retries"
@@ -226,10 +251,77 @@ function LeadDrawer({
           </div>
         )}
 
+        <ResendBookingEmail leadId={lead._id} alreadySent={!!lead.emailSentAt} />
+
         <div className="mt-7 text-xs text-white/40">
           Submitted {new Date(lead._creationTime).toLocaleString()}
         </div>
       </aside>
+    </div>
+  )
+}
+
+function ResendBookingEmail({
+  leadId,
+  alreadySent,
+}: {
+  leadId: Id<"leads">
+  alreadySent: boolean
+}) {
+  const send = useAction(api.admin.resendBookingEmail)
+  const [state, setState] = useState<
+    | { kind: "idle" }
+    | { kind: "sending" }
+    | { kind: "ok" }
+    | { kind: "err"; message: string }
+  >({ kind: "idle" })
+
+  const onClick = async () => {
+    setState({ kind: "sending" })
+    try {
+      const r = await send({ leadId })
+      if (r.ok) setState({ kind: "ok" })
+      else setState({ kind: "err", message: r.error ?? "Failed" })
+    } catch (err) {
+      setState({
+        kind: "err",
+        message: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl bg-[#101012] border border-white/5 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-xs text-white/70 font-medium">
+            {alreadySent ? "Resend booking email" : "Send booking email"}
+          </div>
+          <div className="text-[11px] text-white/40 mt-0.5">
+            Re-renders the template and re-uses the existing click token.
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onClick}
+          disabled={state.kind === "sending"}
+          className="inline-flex items-center gap-2 rounded-full bg-[#c4f54a] text-black text-xs font-semibold px-4 py-2 hover:bg-[#d4ff5a] active:scale-95 transition disabled:opacity-50"
+        >
+          {state.kind === "ok" ? (
+            <>
+              <CheckCircle2 size={14} /> Sent
+            </>
+          ) : (
+            <>
+              <Send size={14} />
+              {state.kind === "sending" ? "Sending…" : alreadySent ? "Resend" : "Send"}
+            </>
+          )}
+        </button>
+      </div>
+      {state.kind === "err" && (
+        <div className="mt-3 text-[11px] text-red-400">{state.message}</div>
+      )}
     </div>
   )
 }
@@ -269,14 +361,18 @@ function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
     pending: "bg-white/10 text-white/70",
     calling: "bg-blue-500/15 text-blue-300 border border-blue-500/20",
+    confirmed: "bg-cyan-500/15 text-cyan-300 border border-cyan-500/20",
+    email_sent: "bg-purple-500/15 text-purple-300 border border-purple-500/20",
+    link_clicked: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20",
     booked: "bg-[#c4f54a]/20 text-[#c4f54a] border border-[#c4f54a]/30",
     declined: "bg-red-500/15 text-red-400 border border-red-500/20",
     no_answer: "bg-amber-500/15 text-amber-400 border border-amber-500/20",
     failed: "bg-red-500/15 text-red-400 border border-red-500/20",
   }
+  const label = status.replace("_", " ")
   return (
     <span className={`inline-block text-[10px] rounded-full px-2 py-0.5 ${map[status] ?? "bg-white/10 text-white/60"}`}>
-      {status}
+      {label}
     </span>
   )
 }

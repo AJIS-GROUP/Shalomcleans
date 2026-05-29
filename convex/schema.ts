@@ -4,6 +4,9 @@ import { v } from "convex/values"
 export const leadStatus = v.union(
   v.literal("pending"),
   v.literal("calling"),
+  v.literal("confirmed"),
+  v.literal("email_sent"),
+  v.literal("link_clicked"),
   v.literal("booked"),
   v.literal("declined"),
   v.literal("no_answer"),
@@ -26,11 +29,18 @@ export default defineSchema({
     notes: v.optional(v.string()),
     pendingBookingPayload: v.optional(v.any()),
     pendingAttempts: v.optional(v.number()),
+    clickToken: v.optional(v.string()),
+    emailSentAt: v.optional(v.number()),
+    emailMessageId: v.optional(v.string()),
+    clickedAt: v.optional(v.number()),
+    clickIp: v.optional(v.string()),
+    clickUserAgent: v.optional(v.string()),
   })
     .index("by_phone", ["phone"])
     .index("by_status", ["status"])
     .index("by_vapi_call", ["vapiCallId"])
-    .index("by_pending_attempts", ["pendingAttempts"]),
+    .index("by_pending_attempts", ["pendingAttempts"])
+    .index("by_click_token", ["clickToken"]),
 
   events: defineTable({
     kind: v.string(),

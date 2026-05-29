@@ -14,6 +14,7 @@ import type * as bookings from "../bookings.js";
 import type * as calls from "../calls.js";
 import type * as crons from "../crons.js";
 import type * as devTools from "../devTools.js";
+import type * as email from "../email.js";
 import type * as events from "../events.js";
 import type * as http from "../http.js";
 import type * as leads from "../leads.js";
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   calls: typeof calls;
   crons: typeof crons;
   devTools: typeof devTools;
+  email: typeof email;
   events: typeof events;
   http: typeof http;
   leads: typeof leads;
