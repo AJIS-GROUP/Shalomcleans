@@ -18,20 +18,38 @@ const inner = convexBetterAuthReactStart({
 // Temporary diagnostic wrapper: surface the real error when the proxy throws,
 // instead of h3's opaque {"message":"HTTPError","unhandled":true}. Remove once
 // login is verified working.
+function describe(e: unknown, depth = 0): Record<string, unknown> | string {
+  if (!(e instanceof Error)) return String(e)
+  if (depth > 3) return `${e.name}: ${e.message}`
+  const out: Record<string, unknown> = {
+    name: e.name,
+    message: e.message,
+    stack: e.stack?.split("\n").slice(0, 6).join("\n"),
+  }
+  for (const k of ["code", "errno", "syscall", "address", "port"]) {
+    const v = (e as unknown as Record<string, unknown>)[k]
+    if (v !== undefined) out[k] = v
+  }
+  if ((e as { cause?: unknown }).cause !== undefined) {
+    out.cause = describe((e as { cause?: unknown }).cause, depth + 1)
+  }
+  return out
+}
+
 async function handler(request: Request): Promise<Response> {
   try {
     return await inner.handler(request)
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    const stack = err instanceof Error ? err.stack ?? "" : ""
+    const detail = describe(err)
     // eslint-disable-next-line no-console
-    console.error("[auth-proxy] handler threw:", message, stack)
+    console.error("[auth-proxy] handler threw:", JSON.stringify(detail))
     return new Response(
       JSON.stringify({
         status: 500,
         message: "auth proxy threw",
-        detail: message,
-        stack: stack.split("\n").slice(0, 4).join("\n"),
+        detail,
+        convexSiteUrl,
+        convexUrl,
       }),
       { status: 500, headers: { "content-type": "application/json" } },
     )
