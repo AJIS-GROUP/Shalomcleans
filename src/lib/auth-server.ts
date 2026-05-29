@@ -10,50 +10,44 @@ const convexUrl = process.env.VITE_CONVEX_URL ?? FALLBACK_CONVEX_URL
 const convexSiteUrl =
   process.env.VITE_CONVEX_SITE_URL ?? FALLBACK_CONVEX_SITE_URL
 
-const inner = convexBetterAuthReactStart({
-  convexUrl,
-  convexSiteUrl,
-})
+// We use the library only for its non-proxy exports. The built-in `handler`
+// streams `request.body` with `duplex: "half"`, which breaks on Vercel because
+// the runtime consumes the body before our handler runs ("expected non-null
+// body source"). Buffer the body once and forward — slower for huge payloads,
+// but auth requests are tiny.
+const inner = convexBetterAuthReactStart({ convexUrl, convexSiteUrl })
 
-// Temporary diagnostic wrapper: surface the real error when the proxy throws,
-// instead of h3's opaque {"message":"HTTPError","unhandled":true}. Remove once
-// login is verified working.
-function describe(e: unknown, depth = 0): Record<string, unknown> | string {
-  if (!(e instanceof Error)) return String(e)
-  if (depth > 3) return `${e.name}: ${e.message}`
-  const out: Record<string, unknown> = {
-    name: e.name,
-    message: e.message,
-    stack: e.stack?.split("\n").slice(0, 6).join("\n"),
-  }
-  for (const k of ["code", "errno", "syscall", "address", "port"]) {
-    const v = (e as unknown as Record<string, unknown>)[k]
-    if (v !== undefined) out[k] = v
-  }
-  if ((e as { cause?: unknown }).cause !== undefined) {
-    out.cause = describe((e as { cause?: unknown }).cause, depth + 1)
-  }
-  return out
-}
+const SITE_HOST = new URL(convexSiteUrl).host
 
 async function handler(request: Request): Promise<Response> {
-  try {
-    return await inner.handler(request)
-  } catch (err) {
-    const detail = describe(err)
-    // eslint-disable-next-line no-console
-    console.error("[auth-proxy] handler threw:", JSON.stringify(detail))
-    return new Response(
-      JSON.stringify({
-        status: 500,
-        message: "auth proxy threw",
-        detail,
-        convexSiteUrl,
-        convexUrl,
-      }),
-      { status: 500, headers: { "content-type": "application/json" } },
-    )
-  }
+  const requestUrl = new URL(request.url)
+  const nextUrl = `${convexSiteUrl}${requestUrl.pathname}${requestUrl.search}`
+
+  const headers = new Headers(request.headers)
+  headers.delete("transfer-encoding")
+  headers.delete("content-length")
+  headers.delete("connection")
+  headers.set("accept-encoding", "application/json")
+  headers.set("host", SITE_HOST)
+  headers.set("x-forwarded-host", requestUrl.host)
+  headers.set("x-forwarded-proto", requestUrl.protocol.replace(/:$/, ""))
+  headers.set("x-better-auth-forwarded-host", requestUrl.host)
+  headers.set(
+    "x-better-auth-forwarded-proto",
+    requestUrl.protocol.replace(/:$/, ""),
+  )
+
+  const body =
+    request.method === "GET" || request.method === "HEAD"
+      ? undefined
+      : await request.arrayBuffer()
+
+  return await fetch(nextUrl, {
+    method: request.method,
+    headers,
+    redirect: "manual",
+    body,
+  })
 }
 
 const { getToken, fetchAuthQuery, fetchAuthMutation } = inner
