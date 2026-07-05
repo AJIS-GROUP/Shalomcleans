@@ -82,7 +82,7 @@ const importRow = v.object({
   ),
 })
 
-type ImportRow = Infer<typeof importRow>
+export type ImportRow = Infer<typeof importRow>
 
 type Outcome = "inserted" | "updated" | "skipped" | "invalid"
 
