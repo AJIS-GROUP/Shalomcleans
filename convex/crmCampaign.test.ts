@@ -25,14 +25,13 @@ async function seed(t: TestConvex<typeof schema>) {
 }
 
 describe("deleteCampaign internals", () => {
-  it("purges memberships then deletes stages + campaign, keeping contacts", async () => {
+  it("removes contacts that were only in the deleted campaign", async () => {
     const t = convexTest(schema, modules)
     const { campaignId } = await seed(t)
 
-    const purged = await t.mutation(
-      internal.crmCampaign._purgeCampaignChunk,
-      { campaignId },
-    )
+    const purged = await t.mutation(internal.crmCampaign._purgeCampaignChunk, {
+      campaignId,
+    })
     expect(purged).toBe(2)
 
     await t.mutation(internal.crmCampaign._finalizeCampaignDelete, {
@@ -40,19 +39,43 @@ describe("deleteCampaign internals", () => {
     })
 
     expect(await t.run((ctx) => ctx.db.get(campaignId))).toBeNull()
-    const stages = await t.run((ctx) =>
-      ctx.db
-        .query("stages")
-        .withIndex("by_campaign", (q) => q.eq("campaignId", campaignId))
-        .collect(),
-    )
-    expect(stages).toHaveLength(0)
     const memberships = await t.run((ctx) =>
       ctx.db.query("memberships").collect(),
     )
     expect(memberships).toHaveLength(0)
-    // Global contacts survive — they may belong to other campaigns.
+    // Contacts belonged only to this campaign, so they are gone too.
     const contacts = await t.run((ctx) => ctx.db.query("contacts").collect())
-    expect(contacts).toHaveLength(2)
+    expect(contacts).toHaveLength(0)
+    const activities = await t.run((ctx) =>
+      ctx.db.query("activities").collect(),
+    )
+    expect(activities).toHaveLength(0)
+  })
+
+  it("keeps a contact that still belongs to another campaign", async () => {
+    const t = convexTest(schema, modules)
+    const { campaignId } = await seed(t) // has a@x.com and b@x.com
+
+    // A second campaign that also contains a@x.com.
+    const otherId = await t.run((ctx) =>
+      createCampaignImpl(ctx, { name: "Keeper" }),
+    )
+    const otherStage = await t.run((ctx) =>
+      ctx.db
+        .query("stages")
+        .withIndex("by_campaign", (q) => q.eq("campaignId", otherId))
+        .first(),
+    )
+    await t.mutation(internal.crm.importChunk, {
+      campaignId: otherId,
+      stageId: otherStage!._id,
+      rows: [{ email: "a@x.com" }],
+    })
+
+    await t.mutation(internal.crmCampaign._purgeCampaignChunk, { campaignId })
+
+    const contacts = await t.run((ctx) => ctx.db.query("contacts").collect())
+    // b@x.com (only in the deleted campaign) is gone; a@x.com (in Keeper) stays.
+    expect(contacts.map((c) => c.emailKey)).toEqual(["a@x.com"])
   })
 })

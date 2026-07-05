@@ -282,7 +282,7 @@ function CrmPage() {
       {confirmDeleteCampaign && campaignId && (
         <ConfirmDialog
           title="Delete campaign?"
-          message="This deletes the campaign and its pipeline. Contacts stay in your global list and any other campaigns."
+          message="This deletes the campaign, its pipeline, and every contact that isn't in another campaign. Contacts shared with another campaign are kept."
           confirmLabel="Delete campaign"
           danger
           onConfirm={async () => {
