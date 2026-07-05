@@ -6,9 +6,18 @@ import { convexBetterAuthReactStart } from "@convex-dev/better-auth/react-start"
 const FALLBACK_CONVEX_URL = "https://earnest-mouse-779.convex.cloud"
 const FALLBACK_CONVEX_SITE_URL = "https://earnest-mouse-779.convex.site"
 
-const convexUrl = process.env.VITE_CONVEX_URL ?? FALLBACK_CONVEX_URL
+// Prefer the runtime env (set on Vercel), then the Vite-inlined build-time value
+// (populated from .env.local in local dev, where process.env has no VITE_ vars),
+// then the hardcoded fallback. Without the import.meta.env step, local dev falls
+// back to the wrong deployment and auth silently targets the wrong backend.
+const convexUrl =
+  process.env.VITE_CONVEX_URL ??
+  import.meta.env.VITE_CONVEX_URL ??
+  FALLBACK_CONVEX_URL
 const convexSiteUrl =
-  process.env.VITE_CONVEX_SITE_URL ?? FALLBACK_CONVEX_SITE_URL
+  process.env.VITE_CONVEX_SITE_URL ??
+  import.meta.env.VITE_CONVEX_SITE_URL ??
+  FALLBACK_CONVEX_SITE_URL
 
 // We use the library only for its non-proxy exports. The built-in `handler`
 // streams `request.body` with `duplex: "half"`, which breaks on Vercel because
