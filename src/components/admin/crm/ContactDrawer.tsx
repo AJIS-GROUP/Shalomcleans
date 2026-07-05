@@ -14,6 +14,7 @@ import {
 import { api } from "../../../../convex/_generated/api"
 import type { Id } from "../../../../convex/_generated/dataModel"
 import { ConfirmDialog } from "#/components/admin/crm/dialogs"
+import { contactDisplayName } from "#/lib/crm/display"
 
 export function ContactDrawer({
   contactId,
@@ -58,7 +59,7 @@ export function ContactDrawer({
         <div className="flex items-start justify-between mb-6">
           <div className="min-w-0">
             <div className="font-display text-lg truncate">
-              {contact?.name ?? contact?.email ?? "Contact"}
+              {contact ? contactDisplayName(contact) : "Contact"}
             </div>
             {contact?.title && (
               <div className="text-xs text-white/40">{contact.title}</div>

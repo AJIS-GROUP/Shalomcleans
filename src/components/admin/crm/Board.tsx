@@ -1,13 +1,26 @@
+import { createPortal } from "react-dom"
 import {
   DragDropContext,
   Draggable,
   Droppable,
+  type DraggableProvided,
   type DropResult,
 } from "@hello-pangea/dnd"
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import type { Id } from "../../../../convex/_generated/dataModel"
 import { applyOptimisticMove } from "#/lib/crm/board"
+import { contactDisplayName } from "#/lib/crm/display"
+
+type Card = {
+  _id: Id<"contacts">
+  membershipId?: string
+  name?: string
+  company?: string
+  email?: string
+  phone?: string
+  tags?: Array<string>
+}
 
 export function Board({
   campaignId,
@@ -32,8 +45,7 @@ export function Board({
 
   const onDragEnd = (result: DropResult) => {
     const { draggableId, destination, source } = result
-    if (!destination) return
-    if (destination.droppableId === source.droppableId) return
+    if (!destination || destination.droppableId === source.droppableId) return
     void moveStage({
       membershipId: draggableId as Id<"memberships">,
       stageId: destination.droppableId as Id<"stages">,
@@ -48,7 +60,22 @@ export function Board({
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {columns.map((col) => (
-          <Droppable droppableId={col.stage._id} key={col.stage._id}>
+          <Droppable
+            droppableId={col.stage._id}
+            key={col.stage._id}
+            // Render the dragged clone into a body portal so a transformed
+            // ancestor (the admin frame / Reveal wrapper) can't offset it.
+            renderClone={(provided, _snapshot, rubric) =>
+              createPortal(
+                <CardBody
+                  provided={provided}
+                  card={col.cards[rubric.source.index] as Card}
+                  dragging
+                />,
+                document.body,
+              )
+            }
+          >
             {(provided, snapshot) => (
               <div
                 ref={provided.innerRef}
@@ -77,39 +104,12 @@ export function Board({
                       index={index}
                       key={card.membershipId}
                     >
-                      {(dp, ds) => (
-                        <div
-                          ref={dp.innerRef}
-                          {...dp.draggableProps}
-                          {...dp.dragHandleProps}
-                          onClick={() => onOpenContact(card._id)}
-                          className={`rounded-xl bg-[#1a1a1c] border p-3 cursor-pointer ${
-                            ds.isDragging
-                              ? "border-[#c4f54a]/50 shadow-lg"
-                              : "border-white/5 hover:border-white/15"
-                          }`}
-                        >
-                          <div className="text-sm text-white truncate">
-                            {card.name ?? card.email ?? "—"}
-                          </div>
-                          {card.company && (
-                            <div className="text-[11px] text-white/40 truncate">
-                              {card.company}
-                            </div>
-                          )}
-                          {(card.tags ?? []).length > 0 && (
-                            <div className="flex gap-1 flex-wrap mt-1.5">
-                              {(card.tags ?? []).slice(0, 3).map((t) => (
-                                <span
-                                  key={t}
-                                  className="text-[9px] rounded-full bg-white/10 text-white/60 px-1.5 py-0.5"
-                                >
-                                  {t}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                      {(dp) => (
+                        <CardBody
+                          provided={dp}
+                          card={card as Card}
+                          onOpen={() => onOpenContact(card._id)}
+                        />
                       )}
                     </Draggable>
                   ))}
@@ -131,5 +131,50 @@ export function Board({
         ))}
       </div>
     </DragDropContext>
+  )
+}
+
+function CardBody({
+  provided,
+  card,
+  onOpen,
+  dragging,
+}: {
+  provided: DraggableProvided
+  card: Card
+  onOpen?: () => void
+  dragging?: boolean
+}) {
+  const title = contactDisplayName(card)
+  const secondary = [card.email, card.phone].find((v) => v && v !== title)
+  return (
+    <div
+      ref={provided.innerRef}
+      {...provided.draggableProps}
+      {...provided.dragHandleProps}
+      onClick={onOpen}
+      className={`rounded-xl bg-[#1a1a1c] border p-3 cursor-pointer ${
+        dragging
+          ? "border-[#c4f54a]/60 shadow-2xl"
+          : "border-white/5 hover:border-white/15"
+      }`}
+    >
+      <div className="text-sm text-white truncate">{title}</div>
+      {secondary && (
+        <div className="text-[11px] text-white/40 truncate">{secondary}</div>
+      )}
+      {(card.tags ?? []).length > 0 && (
+        <div className="flex gap-1 flex-wrap mt-1.5">
+          {(card.tags ?? []).slice(0, 3).map((t) => (
+            <span
+              key={t}
+              className="text-[9px] rounded-full bg-white/10 text-white/60 px-1.5 py-0.5"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

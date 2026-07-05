@@ -196,11 +196,22 @@ function MappingStep({
   )
   return (
     <div>
-      <div className="flex items-center gap-2 text-xs text-white/60 mb-4">
+      <div className="flex items-center gap-2 text-xs text-white/60 mb-2">
         <FileSpreadsheet size={14} /> {parsed.file.name} · {parsed.headers.length}{" "}
-        columns
+        columns · {parsed.preview.length > 0 ? "preview below" : "no rows"}
       </div>
+      <p className="text-[11px] text-white/40 mb-4">
+        We guessed how each column maps. Set anything wrong — pick a field, or{" "}
+        <span className="text-white/60">Custom field</span> to keep extra data,
+        or <span className="text-white/60">Ignore</span> to drop it. Each row
+        needs an <span className="text-white/60">Email</span> or{" "}
+        <span className="text-white/60">Phone</span> to import.
+      </p>
 
+      <div className="grid grid-cols-[1fr_auto] gap-2 px-3 mb-1 text-[9px] uppercase tracking-wide text-white/30">
+        <span>Your column · sample</span>
+        <span>Maps to</span>
+      </div>
       <div className="space-y-1.5 mb-4">
         {mapping.map((col, i) => (
           <div

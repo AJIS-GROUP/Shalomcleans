@@ -25,6 +25,7 @@ import { Board } from "#/components/admin/crm/Board"
 import { ContactDrawer } from "#/components/admin/crm/ContactDrawer"
 import { StageEditor } from "#/components/admin/crm/StageEditor"
 import { contactsToCsv } from "#/lib/crm/csv"
+import { contactDisplayName } from "#/lib/crm/display"
 import {
   emptySelection,
   isRowSelected,
@@ -50,6 +51,7 @@ function CrmPage() {
   const [selection, setSelection] = useState<Selection>(emptySelection())
   const [importOpen, setImportOpen] = useState(false)
   const [newCampaignOpen, setNewCampaignOpen] = useState(false)
+  const [confirmDeleteCampaign, setConfirmDeleteCampaign] = useState(false)
   const [view, setView] = useState<"table" | "board">("table")
   const [stageEditorOpen, setStageEditorOpen] = useState(false)
   const [activeContactId, setActiveContactId] = useState<Id<"contacts"> | null>(
@@ -62,6 +64,7 @@ function CrmPage() {
     campaignId ? { campaignId } : "skip",
   )
   const createCampaign = useMutation(api.crmMutations.createCampaign)
+  const deleteCampaignAction = useAction(api.crmCampaign.deleteCampaign)
 
   const filterArgs = useMemo(
     () => ({
@@ -149,11 +152,13 @@ function CrmPage() {
                     active={view === "table"}
                     onClick={() => setView("table")}
                     icon={<LayoutList size={13} />}
+                    title="Table view"
                   />
                   <ViewToggle
                     active={view === "board"}
                     onClick={() => setView("board")}
                     icon={<Columns3 size={13} />}
+                    title="Board view"
                   />
                 </div>
               )}
@@ -170,8 +175,18 @@ function CrmPage() {
                 <button
                   onClick={() => setImportOpen(true)}
                   className="inline-flex items-center gap-2 rounded-full border border-white/10 text-xs text-white/80 px-4 py-2 hover:bg-white/5 transition-colors"
+                  title="Import contacts from a CSV or spreadsheet"
                 >
                   <UploadCloud size={14} /> Import
+                </button>
+              )}
+              {campaignId && (
+                <button
+                  onClick={() => setConfirmDeleteCampaign(true)}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-red-500/20 text-red-300/80 hover:bg-red-500/15 transition-colors"
+                  title="Delete this campaign"
+                >
+                  <Trash2 size={14} />
                 </button>
               )}
               <div className="relative">
@@ -261,6 +276,21 @@ function CrmPage() {
           submitLabel="Create"
           onSubmit={createNamedCampaign}
           onClose={() => setNewCampaignOpen(false)}
+        />
+      )}
+
+      {confirmDeleteCampaign && campaignId && (
+        <ConfirmDialog
+          title="Delete campaign?"
+          message="This deletes the campaign and its pipeline. Contacts stay in your global list and any other campaigns."
+          confirmLabel="Delete campaign"
+          danger
+          onConfirm={async () => {
+            const id = campaignId
+            chooseCampaign(null)
+            await deleteCampaignAction({ campaignId: id })
+          }}
+          onClose={() => setConfirmDeleteCampaign(false)}
         />
       )}
 
@@ -445,14 +475,17 @@ function ViewToggle({
   active,
   onClick,
   icon,
+  title,
 }: {
   active: boolean
   onClick: () => void
   icon: React.ReactNode
+  title?: string
 }) {
   return (
     <button
       onClick={onClick}
+      title={title}
       className={`inline-flex items-center justify-center w-8 h-7 rounded-full transition-colors ${
         active ? "bg-[#c4f54a] text-black" : "text-white/50 hover:text-white"
       }`}
@@ -556,9 +589,11 @@ function ContactsTable({
                   className="accent-[#c4f54a] w-3.5 h-3.5"
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="text-white truncate">{c.name ?? "—"}</div>
+                  <div className="text-white truncate">
+                    {contactDisplayName(c)}
+                  </div>
                   <div className="text-[10px] text-white/40 truncate">
-                    {c.email ?? c.phone ?? ""}
+                    {c.email ?? c.company ?? ""}
                   </div>
                 </div>
                 <div className="w-32 hidden md:block text-white/70 truncate">

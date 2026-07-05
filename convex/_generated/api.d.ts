@@ -14,6 +14,7 @@ import type * as bookings from "../bookings.js";
 import type * as calls from "../calls.js";
 import type * as crm from "../crm.js";
 import type * as crmBulk from "../crmBulk.js";
+import type * as crmCampaign from "../crmCampaign.js";
 import type * as crmImport from "../crmImport.js";
 import type * as crmImportNode from "../crmImportNode.js";
 import type * as crmMutations from "../crmMutations.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   calls: typeof calls;
   crm: typeof crm;
   crmBulk: typeof crmBulk;
+  crmCampaign: typeof crmCampaign;
   crmImport: typeof crmImport;
   crmImportNode: typeof crmImportNode;
   crmMutations: typeof crmMutations;
