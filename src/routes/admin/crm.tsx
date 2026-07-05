@@ -11,10 +11,12 @@ import {
   Trash2,
   Download,
   X,
+  UploadCloud,
 } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
 import type { Doc, Id } from "../../../convex/_generated/dataModel"
 import { Reveal } from "#/components/admin/Reveal"
+import { ImportDialog } from "#/components/admin/crm/ImportDialog"
 import { contactsToCsv } from "#/lib/crm/csv"
 import {
   emptySelection,
@@ -39,6 +41,7 @@ function CrmPage() {
   const [facet, setFacet] = useState<{ hasEmail?: boolean; hasPhone?: boolean }>({})
   const [tag] = useState<string | null>(null)
   const [selection, setSelection] = useState<Selection>(emptySelection())
+  const [importOpen, setImportOpen] = useState(false)
 
   const campaigns = useQuery(api.crmQueries.listCampaigns)
   const stages = useQuery(
@@ -127,17 +130,27 @@ function CrmPage() {
                   : "Every contact across your outreach"}
               </p>
             </div>
-            <div className="relative">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
-              />
-              <input
-                value={search}
-                onChange={(e) => resetTo(() => setSearch(e.target.value))}
-                placeholder="Name, email, company…"
-                className="w-72 bg-[#101012] border border-white/5 rounded-full pl-9 pr-4 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#c4f54a]/40 focus:ring-2 focus:ring-[#c4f54a]/10"
-              />
+            <div className="flex items-center gap-2">
+              {campaignId && (
+                <button
+                  onClick={() => setImportOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 text-xs text-white/80 px-4 py-2 hover:bg-white/5 transition-colors"
+                >
+                  <UploadCloud size={14} /> Import
+                </button>
+              )}
+              <div className="relative">
+                <Search
+                  size={14}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+                />
+                <input
+                  value={search}
+                  onChange={(e) => resetTo(() => setSearch(e.target.value))}
+                  placeholder="Name, email, company…"
+                  className="w-64 bg-[#101012] border border-white/5 rounded-full pl-9 pr-4 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#c4f54a]/40 focus:ring-2 focus:ring-[#c4f54a]/10"
+                />
+              </div>
             </div>
           </div>
         </Reveal>
@@ -181,6 +194,16 @@ function CrmPage() {
           />
         )}
       </div>
+
+      {importOpen && campaignId && (
+        <ImportDialog
+          campaignId={campaignId}
+          campaignName={
+            campaigns?.find((c) => c._id === campaignId)?.name ?? "campaign"
+          }
+          onClose={() => setImportOpen(false)}
+        />
+      )}
     </div>
   )
 }
