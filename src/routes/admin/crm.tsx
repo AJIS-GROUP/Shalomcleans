@@ -12,11 +12,17 @@ import {
   Download,
   X,
   UploadCloud,
+  LayoutList,
+  Columns3,
+  Settings2,
 } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
 import type { Doc, Id } from "../../../convex/_generated/dataModel"
 import { Reveal } from "#/components/admin/Reveal"
 import { ImportDialog } from "#/components/admin/crm/ImportDialog"
+import { Board } from "#/components/admin/crm/Board"
+import { ContactDrawer } from "#/components/admin/crm/ContactDrawer"
+import { StageEditor } from "#/components/admin/crm/StageEditor"
 import { contactsToCsv } from "#/lib/crm/csv"
 import {
   emptySelection,
@@ -42,6 +48,11 @@ function CrmPage() {
   const [tag] = useState<string | null>(null)
   const [selection, setSelection] = useState<Selection>(emptySelection())
   const [importOpen, setImportOpen] = useState(false)
+  const [view, setView] = useState<"table" | "board">("table")
+  const [stageEditorOpen, setStageEditorOpen] = useState(false)
+  const [activeContactId, setActiveContactId] = useState<Id<"contacts"> | null>(
+    null,
+  )
 
   const campaigns = useQuery(api.crmQueries.listCampaigns)
   const stages = useQuery(
@@ -132,6 +143,29 @@ function CrmPage() {
             </div>
             <div className="flex items-center gap-2">
               {campaignId && (
+                <div className="inline-flex items-center bg-[#101012] border border-white/5 rounded-full p-0.5">
+                  <ViewToggle
+                    active={view === "table"}
+                    onClick={() => setView("table")}
+                    icon={<LayoutList size={13} />}
+                  />
+                  <ViewToggle
+                    active={view === "board"}
+                    onClick={() => setView("board")}
+                    icon={<Columns3 size={13} />}
+                  />
+                </div>
+              )}
+              {campaignId && (
+                <button
+                  onClick={() => setStageEditorOpen(true)}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/10 text-white/70 hover:bg-white/5 transition-colors"
+                  title="Edit pipeline stages"
+                >
+                  <Settings2 size={14} />
+                </button>
+              )}
+              {campaignId && (
                 <button
                   onClick={() => setImportOpen(true)}
                   className="inline-flex items-center gap-2 rounded-full border border-white/10 text-xs text-white/80 px-4 py-2 hover:bg-white/5 transition-colors"
@@ -155,45 +189,68 @@ function CrmPage() {
           </div>
         </Reveal>
 
-        <Reveal delay={0.06}>
-          <FilterChips
-            stages={stages}
-            stageId={stageId}
-            onStage={(id) => resetTo(() => setStageId(id))}
-            facet={facet}
-            onFacet={(f) => resetTo(() => setFacet(f))}
-          />
-        </Reveal>
+        {campaignId && view === "board" ? (
+          <Reveal delay={0.06}>
+            <Board campaignId={campaignId} onOpenContact={setActiveContactId} />
+          </Reveal>
+        ) : (
+          <>
+            <Reveal delay={0.06}>
+              <FilterChips
+                stages={stages}
+                stageId={stageId}
+                onStage={(id) => resetTo(() => setStageId(id))}
+                facet={facet}
+                onFacet={(f) => resetTo(() => setFacet(f))}
+              />
+            </Reveal>
 
-        <Reveal delay={0.12}>
-          <ContactsTable
-            results={results as Array<ContactRow>}
-            status={status}
-            loadMore={loadMore}
-            selection={selection}
-            setSelection={setSelection}
-            stageMap={stageMap}
-            showStage={!!campaignId}
-          />
-        </Reveal>
+            <Reveal delay={0.12}>
+              <ContactsTable
+                results={results as Array<ContactRow>}
+                status={status}
+                loadMore={loadMore}
+                selection={selection}
+                setSelection={setSelection}
+                stageMap={stageMap}
+                showStage={!!campaignId}
+                onOpenContact={setActiveContactId}
+              />
+            </Reveal>
 
-        {count > 0 && (
-          <BulkBar
-            count={count}
-            selection={selection}
-            loadedCount={results.length}
-            knownTotal={knownTotal}
-            onSelectAllMatching={() =>
-              setSelection(selectAllMatching(knownTotal ?? results.length))
-            }
-            onClear={() => setSelection(emptySelection())}
-            campaignId={campaignId}
-            stages={stages}
-            filterArgs={filterArgs}
-            results={results as Array<ContactRow>}
-          />
+            {count > 0 && (
+              <BulkBar
+                count={count}
+                selection={selection}
+                loadedCount={results.length}
+                knownTotal={knownTotal}
+                onSelectAllMatching={() =>
+                  setSelection(selectAllMatching(knownTotal ?? results.length))
+                }
+                onClear={() => setSelection(emptySelection())}
+                campaignId={campaignId}
+                stages={stages}
+                filterArgs={filterArgs}
+                results={results as Array<ContactRow>}
+              />
+            )}
+          </>
         )}
       </div>
+
+      {activeContactId && (
+        <ContactDrawer
+          contactId={activeContactId}
+          onClose={() => setActiveContactId(null)}
+        />
+      )}
+
+      {stageEditorOpen && campaignId && (
+        <StageEditor
+          campaignId={campaignId}
+          onClose={() => setStageEditorOpen(false)}
+        />
+      )}
 
       {importOpen && campaignId && (
         <ImportDialog
@@ -372,6 +429,27 @@ function Chip({
   )
 }
 
+function ViewToggle({
+  active,
+  onClick,
+  icon,
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center justify-center w-8 h-7 rounded-full transition-colors ${
+        active ? "bg-[#c4f54a] text-black" : "text-white/50 hover:text-white"
+      }`}
+    >
+      {icon}
+    </button>
+  )
+}
+
 function ContactsTable({
   results,
   status,
@@ -380,6 +458,7 @@ function ContactsTable({
   setSelection,
   stageMap,
   showStage,
+  onOpenContact,
 }: {
   results: Array<ContactRow>
   status: string
@@ -388,6 +467,7 @@ function ContactsTable({
   setSelection: (s: Selection) => void
   stageMap: Map<Id<"stages">, Doc<"stages">>
   showStage: boolean
+  onOpenContact: (id: Id<"contacts">) => void
 }) {
   const parentRef = useRef<HTMLDivElement>(null)
   const rowVirtualizer = useVirtualizer({
@@ -454,7 +534,7 @@ function ContactsTable({
                 key={c._id}
                 className="absolute left-0 right-0 flex items-center gap-3 px-4 border-t border-white/5 hover:bg-white/[0.02] cursor-pointer text-sm"
                 style={{ height: vi.size, transform: `translateY(${vi.start}px)` }}
-                onClick={() => setSelection(toggleRow(selection, c._id))}
+                onClick={() => onOpenContact(c._id)}
               >
                 <input
                   type="checkbox"

@@ -3,6 +3,9 @@ import { v } from "convex/values"
 import type { Id } from "./_generated/dataModel"
 import { requireAdmin } from "./auth"
 import { logActivity, type WriteCtx } from "./crm"
+import { stageType } from "./schema"
+
+type StageType = "active" | "won" | "lost"
 
 // Fallback pipeline used when no global default template has been configured.
 const DEFAULT_STAGES: Array<{
@@ -133,6 +136,90 @@ export async function moveStageImpl(
     meta: { from: oldStage?.name, to: newStage.name },
     by: args.by,
   })
+}
+
+// ---- Stage configuration ----
+
+export async function addStageImpl(
+  ctx: WriteCtx,
+  args: {
+    campaignId?: Id<"campaigns">
+    name: string
+    color: string
+    type: StageType
+  },
+): Promise<Id<"stages">> {
+  const siblings = await ctx.db
+    .query("stages")
+    .withIndex("by_campaign", (q) => q.eq("campaignId", args.campaignId))
+    .collect()
+  const order = siblings.reduce((m, s) => Math.max(m, s.order), -1) + 1
+  return await ctx.db.insert("stages", {
+    campaignId: args.campaignId,
+    name: args.name.trim() || "Stage",
+    order,
+    color: args.color,
+    type: args.type,
+    count: 0,
+  })
+}
+
+export async function updateStageImpl(
+  ctx: WriteCtx,
+  args: {
+    stageId: Id<"stages">
+    name?: string
+    color?: string
+    type?: StageType
+  },
+): Promise<void> {
+  const patch: Partial<{ name: string; color: string; type: StageType }> = {}
+  if (args.name !== undefined) patch.name = args.name.trim() || "Stage"
+  if (args.color !== undefined) patch.color = args.color
+  if (args.type !== undefined) patch.type = args.type
+  if (Object.keys(patch).length > 0) await ctx.db.patch(args.stageId, patch)
+}
+
+export async function reorderStagesImpl(
+  ctx: WriteCtx,
+  { orderedIds }: { orderedIds: Array<Id<"stages">> },
+): Promise<void> {
+  for (let i = 0; i < orderedIds.length; i++) {
+    await ctx.db.patch(orderedIds[i], { order: i })
+  }
+}
+
+export async function deleteStageImpl(
+  ctx: WriteCtx,
+  args: { stageId: Id<"stages">; reassignToStageId?: Id<"stages"> },
+): Promise<void> {
+  const stage = await ctx.db.get(args.stageId)
+  if (!stage) return
+
+  const members = stage.campaignId
+    ? await ctx.db
+        .query("memberships")
+        .withIndex("by_campaign_stage", (q) =>
+          q.eq("campaignId", stage.campaignId!).eq("stageId", args.stageId),
+        )
+        .collect()
+    : []
+
+  if (members.length > 0) {
+    if (!args.reassignToStageId) {
+      throw new Error("Stage has contacts; choose a stage to reassign them to")
+    }
+    for (const m of members) {
+      await ctx.db.patch(m._id, { stageId: args.reassignToStageId })
+    }
+    const target = await ctx.db.get(args.reassignToStageId)
+    if (target) {
+      await ctx.db.patch(args.reassignToStageId, {
+        count: (target.count ?? 0) + members.length,
+      })
+    }
+  }
+  await ctx.db.delete(args.stageId)
 }
 
 // ---- Deletion ----
@@ -279,6 +366,51 @@ export const removeFromCampaign = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx)
     await removeFromCampaignImpl(ctx, args)
+  },
+})
+
+export const addStage = mutation({
+  args: {
+    campaignId: v.optional(v.id("campaigns")),
+    name: v.string(),
+    color: v.string(),
+    type: stageType,
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    return await addStageImpl(ctx, args)
+  },
+})
+
+export const updateStage = mutation({
+  args: {
+    stageId: v.id("stages"),
+    name: v.optional(v.string()),
+    color: v.optional(v.string()),
+    type: v.optional(stageType),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await updateStageImpl(ctx, args)
+  },
+})
+
+export const reorderStages = mutation({
+  args: { orderedIds: v.array(v.id("stages")) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await reorderStagesImpl(ctx, args)
+  },
+})
+
+export const deleteStage = mutation({
+  args: {
+    stageId: v.id("stages"),
+    reassignToStageId: v.optional(v.id("stages")),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await deleteStageImpl(ctx, args)
   },
 })
 
