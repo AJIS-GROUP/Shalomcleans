@@ -1,5 +1,29 @@
 import { describe, expect, it } from "vitest"
-import { suggestMapping } from "./mapping"
+import { columnSamples, suggestMapping } from "./mapping"
+
+describe("columnSamples", () => {
+  it("skips leading empty cells to surface real examples", () => {
+    const rows = [
+      { email: "", name: "Ada" },
+      { email: "  ", name: "Bob" },
+      { email: "ada@example.com", name: "Carol" },
+      { email: "bob@example.com", name: "Dan" },
+    ]
+    const samples = columnSamples(rows, ["email", "name"])
+    expect(samples.email).toEqual(["ada@example.com", "bob@example.com"])
+    expect(samples.name).toEqual(["Ada", "Bob"])
+  })
+
+  it("keeps at most 2 samples per column", () => {
+    const rows = [{ x: "1" }, { x: "2" }, { x: "3" }]
+    expect(columnSamples(rows, ["x"]).x).toEqual(["1", "2"])
+  })
+
+  it("returns an empty list for a column that is entirely blank", () => {
+    const rows = [{ x: "" }, { x: "" }]
+    expect(columnSamples(rows, ["x"]).x).toEqual([])
+  })
+})
 
 describe("suggestMapping", () => {
   it("detects the common core headers", () => {

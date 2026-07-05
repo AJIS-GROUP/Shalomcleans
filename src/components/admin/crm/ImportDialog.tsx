@@ -3,7 +3,12 @@ import { useAction, useMutation, useQuery } from "convex/react"
 import { UploadCloud, X, FileSpreadsheet, CheckCircle2, AlertCircle } from "lucide-react"
 import { api } from "../../../../convex/_generated/api"
 import type { Id } from "../../../../convex/_generated/dataModel"
-import { suggestMapping, type ColumnMapping, type ColumnTarget } from "#/lib/crm/mapping"
+import {
+  columnSamples,
+  suggestMapping,
+  type ColumnMapping,
+  type ColumnTarget,
+} from "#/lib/crm/mapping"
 
 const TARGET_OPTIONS: Array<{ value: ColumnTarget; label: string }> = [
   { value: "name", label: "Name" },
@@ -18,7 +23,8 @@ const TARGET_OPTIONS: Array<{ value: ColumnTarget; label: string }> = [
 type Parsed = {
   file: File
   headers: Array<string>
-  preview: Array<Record<string, string>>
+  rowCount: number
+  samples: Record<string, Array<string>>
 }
 
 export function ImportDialog({
@@ -60,7 +66,12 @@ export function ImportDialog({
         setError("Couldn't find any columns in that file.")
         return
       }
-      setParsed({ file, headers, preview: rows.slice(0, 5) })
+      setParsed({
+        file,
+        headers,
+        rowCount: rows.length,
+        samples: columnSamples(rows, headers),
+      })
       setMapping(suggestMapping(headers))
     } catch {
       setError("Couldn't read that file. Supported: CSV, XLS, XLSX.")
@@ -198,7 +209,7 @@ function MappingStep({
     <div>
       <div className="flex items-center gap-2 text-xs text-white/60 mb-2">
         <FileSpreadsheet size={14} /> {parsed.file.name} · {parsed.headers.length}{" "}
-        columns · {parsed.preview.length > 0 ? "preview below" : "no rows"}
+        columns · {parsed.rowCount.toLocaleString()} rows
       </div>
       <p className="text-[11px] text-white/40 mb-4">
         We guessed how each column maps. Set anything wrong — pick a field, or{" "}
@@ -221,11 +232,7 @@ function MappingStep({
             <div className="flex-1 min-w-0">
               <div className="text-xs text-white truncate">{col.header}</div>
               <div className="text-[10px] text-white/30 truncate">
-                {parsed.preview
-                  .map((r) => r[col.header])
-                  .filter(Boolean)
-                  .slice(0, 2)
-                  .join(", ") || "—"}
+                {parsed.samples[col.header]?.join(", ") || "—"}
               </div>
             </div>
             <select

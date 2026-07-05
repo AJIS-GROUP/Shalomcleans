@@ -31,6 +31,33 @@ function detect(header: string): Exclude<ColumnTarget, "ignore"> {
  * header for that same field is demoted to custom — mirroring the server
  * importer, which keeps the first column and routes duplicates to custom.
  */
+const SAMPLE_SCAN_ROWS = 500
+const SAMPLES_PER_COLUMN = 2
+
+/**
+ * Collect a few real (non-empty) example values per column, scanning past
+ * leading blank cells so a column like `email` whose first rows are empty still
+ * shows representative data in the mapping preview. Bounded on both rows scanned
+ * and samples kept.
+ */
+export function columnSamples(
+  rows: Array<Record<string, unknown>>,
+  headers: Array<string>,
+): Record<string, Array<string>> {
+  const out: Record<string, Array<string>> = {}
+  for (const h of headers) out[h] = []
+  const limit = Math.min(rows.length, SAMPLE_SCAN_ROWS)
+  for (let i = 0; i < limit; i++) {
+    for (const h of headers) {
+      if (out[h].length >= SAMPLES_PER_COLUMN) continue
+      const raw = rows[i][h]
+      const value = (raw == null ? "" : String(raw)).trim()
+      if (value) out[h].push(value)
+    }
+  }
+  return out
+}
+
 export function suggestMapping(headers: Array<string>): ColumnMapping {
   const claimed = new Set<ColumnTarget>()
   return headers.map((header) => {
