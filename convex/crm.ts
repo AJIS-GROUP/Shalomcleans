@@ -287,13 +287,19 @@ export const importChunk = internalMutation({
       }
     }
 
-    // Each inserted/updated row added a fresh membership to this campaign.
+    // Each inserted/updated row added a fresh membership at this stage.
     const newMembers = inserted + updated
     if (newMembers > 0) {
       const camp = await ctx.db.get(campaignId)
       if (camp) {
         await ctx.db.patch(campaignId, {
           contactCount: camp.contactCount + newMembers,
+        })
+      }
+      const stage = await ctx.db.get(stageId)
+      if (stage) {
+        await ctx.db.patch(stageId, {
+          count: (stage.count ?? 0) + newMembers,
         })
       }
     }

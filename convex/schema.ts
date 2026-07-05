@@ -126,6 +126,9 @@ export default defineSchema({
     order: v.number(),
     color: v.string(),
     type: stageType,
+    // Denormalised membership count so boards render column totals without
+    // scanning. Optional/absent = 0. Maintained by import, move, and delete.
+    count: v.optional(v.number()),
   }).index("by_campaign", ["campaignId"]),
 
   // The join: stage lives here, so one contact can sit at different stages in
