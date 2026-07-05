@@ -7,6 +7,7 @@ import {
 import { useMutation, useQuery } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
 import type { Id } from "../../../../convex/_generated/dataModel"
+import { applyOptimisticMove } from "#/lib/crm/board"
 
 export function Board({
   campaignId,
@@ -16,7 +17,18 @@ export function Board({
   onOpenContact: (contactId: Id<"contacts">) => void
 }) {
   const columns = useQuery(api.crmQueries.boardColumns, { campaignId })
-  const moveStage = useMutation(api.crmMutations.moveStage)
+  // Optimistic: the card jumps columns instantly, before the server round-trip.
+  const moveStage = useMutation(api.crmMutations.moveStage).withOptimisticUpdate(
+    (store, { membershipId, stageId }) => {
+      const current = store.getQuery(api.crmQueries.boardColumns, { campaignId })
+      if (!current) return
+      store.setQuery(
+        api.crmQueries.boardColumns,
+        { campaignId },
+        applyOptimisticMove(current, membershipId, stageId),
+      )
+    },
+  )
 
   const onDragEnd = (result: DropResult) => {
     const { draggableId, destination, source } = result

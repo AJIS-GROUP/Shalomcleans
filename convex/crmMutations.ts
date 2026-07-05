@@ -22,6 +22,8 @@ const DEFAULT_STAGES: Array<{
 ]
 
 const NOTE_MAX = 2000
+// Max memberships reassigned in a single deleteStage transaction (Convex limit).
+const STAGE_REASSIGN_LIMIT = 1000
 
 function dec(n: number | undefined): number {
   return Math.max(0, (n ?? 0) - 1)
@@ -208,6 +210,13 @@ export async function deleteStageImpl(
   if (members.length > 0) {
     if (!args.reassignToStageId) {
       throw new Error("Stage has contacts; choose a stage to reassign them to")
+    }
+    // Reassigning happens in a single mutation, so keep it well under Convex's
+    // per-transaction write limit. For a very full stage, bulk-move first.
+    if (members.length > STAGE_REASSIGN_LIMIT) {
+      throw new Error(
+        `This stage has ${members.length} contacts — move them out in bulk before deleting it`,
+      )
     }
     for (const m of members) {
       await ctx.db.patch(m._id, { stageId: args.reassignToStageId })

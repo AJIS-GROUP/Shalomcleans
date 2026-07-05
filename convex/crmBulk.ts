@@ -182,7 +182,8 @@ export const _runBulk = internalAction({
     try {
       const targets: Array<Id<"contacts">> = []
       if (sel.ids) {
-        targets.push(...sel.ids)
+        // Cap an explicit id list to the same ceiling as filter enumeration.
+        targets.push(...sel.ids.slice(0, MAX_TARGETS))
       } else if (sel.filter) {
         let cursor: string | null = null
         while (targets.length < MAX_TARGETS) {
