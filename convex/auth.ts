@@ -26,7 +26,10 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
-      disableSignUp: true,
+      // Signup is disabled by default; set ALLOW_SIGNUP=true in the Convex env
+      // to temporarily open it (e.g. to provision an admin on a fresh
+      // deployment), then unset it to re-lock.
+      disableSignUp: process.env.ALLOW_SIGNUP !== "true",
       requireEmailVerification: false,
       minPasswordLength: 12,
     },

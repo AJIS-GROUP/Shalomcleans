@@ -1,0 +1,534 @@
+import { mutation } from "./_generated/server"
+import { v } from "convex/values"
+import type { Id } from "./_generated/dataModel"
+import { requireAdmin } from "./auth"
+import { bumpCounts, logActivity, upsertRow, type WriteCtx } from "./crm"
+import { stageType } from "./schema"
+
+type StageType = "active" | "won" | "lost"
+
+// Fallback pipeline used when no global default template has been configured.
+const DEFAULT_STAGES: Array<{
+  name: string
+  color: string
+  type: "active" | "won" | "lost"
+}> = [
+  { name: "New", color: "#8b9cff", type: "active" },
+  { name: "Contacted", color: "#6ee7b7", type: "active" },
+  { name: "Replied", color: "#fcd34d", type: "active" },
+  { name: "Qualified", color: "#c4b5fd", type: "active" },
+  { name: "Won", color: "#c4f54a", type: "won" },
+  { name: "Lost", color: "#f87171", type: "lost" },
+]
+
+const NOTE_MAX = 2000
+// Max memberships reassigned in a single deleteStage transaction (Convex limit).
+const STAGE_REASSIGN_LIMIT = 1000
+
+function dec(n: number | undefined): number {
+  return Math.max(0, (n ?? 0) - 1)
+}
+
+// ---- Campaign ----
+
+export async function createCampaignImpl(
+  ctx: WriteCtx,
+  args: { name: string; description?: string; color?: string },
+): Promise<Id<"campaigns">> {
+  const campaignId = await ctx.db.insert("campaigns", {
+    name: args.name.trim() || "Untitled campaign",
+    description: args.description,
+    color: args.color,
+    contactCount: 0,
+  })
+
+  // Seed stages from the editable global template (campaignId undefined), or the
+  // constant fallback if none exists yet.
+  const template = await ctx.db
+    .query("stages")
+    .withIndex("by_campaign", (q) => q.eq("campaignId", undefined))
+    .collect()
+  template.sort((a, b) => a.order - b.order)
+  const seeds =
+    template.length > 0
+      ? template.map((s) => ({ name: s.name, color: s.color, type: s.type }))
+      : DEFAULT_STAGES
+
+  let order = 0
+  for (const s of seeds) {
+    await ctx.db.insert("stages", {
+      campaignId,
+      name: s.name,
+      order: order++,
+      color: s.color,
+      type: s.type,
+      count: 0,
+    })
+  }
+  return campaignId
+}
+
+/**
+ * Manually add a single contact to a campaign's first stage. Dedupes by email
+ * (then phone) exactly like the importer, and rejects a row with no way to
+ * reach the person.
+ */
+export async function createContactImpl(
+  ctx: WriteCtx,
+  args: {
+    campaignId: Id<"campaigns">
+    name?: string
+    email?: string
+    phone?: string
+    company?: string
+    title?: string
+    by?: string
+  },
+): Promise<"inserted" | "updated" | "skipped"> {
+  const stages = await ctx.db
+    .query("stages")
+    .withIndex("by_campaign", (q) => q.eq("campaignId", args.campaignId))
+    .collect()
+  stages.sort((a, b) => a.order - b.order)
+  const first = stages[0]
+  if (!first) throw new Error("Campaign has no stages")
+
+  const outcome = await upsertRow(ctx, {
+    campaignId: args.campaignId,
+    stageId: first._id,
+    by: args.by,
+    row: {
+      name: args.name,
+      email: args.email,
+      phone: args.phone,
+      company: args.company,
+      title: args.title,
+    },
+  })
+  if (outcome === "invalid") {
+    throw new Error("Add an email or phone number for this contact")
+  }
+  if (outcome === "inserted" || outcome === "updated") {
+    await bumpCounts(ctx, args.campaignId, first._id, 1)
+  }
+  return outcome
+}
+
+/** Add an existing contact to a campaign's first stage, unless already a member. */
+export async function addContactToCampaignImpl(
+  ctx: WriteCtx,
+  args: { contactId: Id<"contacts">; campaignId: Id<"campaigns">; by?: string },
+): Promise<void> {
+  const existing = await ctx.db
+    .query("memberships")
+    .withIndex("by_contact_campaign", (q) =>
+      q.eq("contactId", args.contactId).eq("campaignId", args.campaignId),
+    )
+    .first()
+  if (existing) return
+
+  const stages = await ctx.db
+    .query("stages")
+    .withIndex("by_campaign", (q) => q.eq("campaignId", args.campaignId))
+    .collect()
+  stages.sort((a, b) => a.order - b.order)
+  const first = stages[0]
+  if (!first) return
+
+  await ctx.db.insert("memberships", {
+    contactId: args.contactId,
+    campaignId: args.campaignId,
+    stageId: first._id,
+    addedAt: Date.now(),
+  })
+  await ctx.db.patch(first._id, { count: (first.count ?? 0) + 1 })
+  const camp = await ctx.db.get(args.campaignId)
+  if (camp) {
+    await ctx.db.patch(args.campaignId, {
+      contactCount: camp.contactCount + 1,
+    })
+  }
+  await logActivity(ctx, {
+    contactId: args.contactId,
+    campaignId: args.campaignId,
+    type: "import",
+    by: args.by,
+  })
+}
+
+// ---- Stage movement ----
+
+export async function moveStageImpl(
+  ctx: WriteCtx,
+  args: { membershipId: Id<"memberships">; stageId: Id<"stages">; by?: string },
+): Promise<void> {
+  const m = await ctx.db.get(args.membershipId)
+  if (!m) throw new Error("Membership not found")
+  if (m.stageId === args.stageId) return
+
+  const newStage = await ctx.db.get(args.stageId)
+  if (!newStage) throw new Error("Stage not found")
+  if (newStage.campaignId !== m.campaignId) {
+    throw new Error("Cannot move a contact into another campaign's stage")
+  }
+  const oldStage = await ctx.db.get(m.stageId)
+
+  await ctx.db.patch(args.membershipId, { stageId: args.stageId })
+  if (oldStage) await ctx.db.patch(oldStage._id, { count: dec(oldStage.count) })
+  await ctx.db.patch(args.stageId, { count: (newStage.count ?? 0) + 1 })
+
+  await logActivity(ctx, {
+    contactId: m.contactId,
+    campaignId: m.campaignId,
+    type: "stage_change",
+    meta: { from: oldStage?.name, to: newStage.name },
+    by: args.by,
+  })
+}
+
+// ---- Stage configuration ----
+
+export async function addStageImpl(
+  ctx: WriteCtx,
+  args: {
+    campaignId?: Id<"campaigns">
+    name: string
+    color: string
+    type: StageType
+  },
+): Promise<Id<"stages">> {
+  const siblings = await ctx.db
+    .query("stages")
+    .withIndex("by_campaign", (q) => q.eq("campaignId", args.campaignId))
+    .collect()
+  const order = siblings.reduce((m, s) => Math.max(m, s.order), -1) + 1
+  return await ctx.db.insert("stages", {
+    campaignId: args.campaignId,
+    name: args.name.trim() || "Stage",
+    order,
+    color: args.color,
+    type: args.type,
+    count: 0,
+  })
+}
+
+export async function updateStageImpl(
+  ctx: WriteCtx,
+  args: {
+    stageId: Id<"stages">
+    name?: string
+    color?: string
+    type?: StageType
+  },
+): Promise<void> {
+  const patch: Partial<{ name: string; color: string; type: StageType }> = {}
+  if (args.name !== undefined) patch.name = args.name.trim() || "Stage"
+  if (args.color !== undefined) patch.color = args.color
+  if (args.type !== undefined) patch.type = args.type
+  if (Object.keys(patch).length > 0) await ctx.db.patch(args.stageId, patch)
+}
+
+export async function reorderStagesImpl(
+  ctx: WriteCtx,
+  { orderedIds }: { orderedIds: Array<Id<"stages">> },
+): Promise<void> {
+  for (let i = 0; i < orderedIds.length; i++) {
+    await ctx.db.patch(orderedIds[i], { order: i })
+  }
+}
+
+export async function deleteStageImpl(
+  ctx: WriteCtx,
+  args: { stageId: Id<"stages">; reassignToStageId?: Id<"stages"> },
+): Promise<void> {
+  const stage = await ctx.db.get(args.stageId)
+  if (!stage) return
+
+  const members = stage.campaignId
+    ? await ctx.db
+        .query("memberships")
+        .withIndex("by_campaign_stage", (q) =>
+          q.eq("campaignId", stage.campaignId!).eq("stageId", args.stageId),
+        )
+        .collect()
+    : []
+
+  if (members.length > 0) {
+    if (!args.reassignToStageId) {
+      throw new Error("Stage has contacts; choose a stage to reassign them to")
+    }
+    // Reassigning happens in a single mutation, so keep it well under Convex's
+    // per-transaction write limit. For a very full stage, bulk-move first.
+    if (members.length > STAGE_REASSIGN_LIMIT) {
+      throw new Error(
+        `This stage has ${members.length} contacts — move them out in bulk before deleting it`,
+      )
+    }
+    for (const m of members) {
+      await ctx.db.patch(m._id, { stageId: args.reassignToStageId })
+    }
+    const target = await ctx.db.get(args.reassignToStageId)
+    if (target) {
+      await ctx.db.patch(args.reassignToStageId, {
+        count: (target.count ?? 0) + members.length,
+      })
+    }
+  }
+  await ctx.db.delete(args.stageId)
+}
+
+// ---- Deletion ----
+
+export async function deleteContactImpl(
+  ctx: WriteCtx,
+  { contactId }: { contactId: Id<"contacts"> },
+): Promise<void> {
+  const memberships = await ctx.db
+    .query("memberships")
+    .withIndex("by_contact", (q) => q.eq("contactId", contactId))
+    .collect()
+  for (const m of memberships) {
+    const stage = await ctx.db.get(m.stageId)
+    if (stage) await ctx.db.patch(stage._id, { count: dec(stage.count) })
+    const camp = await ctx.db.get(m.campaignId)
+    if (camp) await ctx.db.patch(camp._id, { contactCount: dec(camp.contactCount) })
+    await ctx.db.delete(m._id)
+  }
+  const activities = await ctx.db
+    .query("activities")
+    .withIndex("by_contact", (q) => q.eq("contactId", contactId))
+    .collect()
+  for (const a of activities) await ctx.db.delete(a._id)
+  await ctx.db.delete(contactId)
+}
+
+export async function removeFromCampaignImpl(
+  ctx: WriteCtx,
+  { membershipId }: { membershipId: Id<"memberships"> },
+): Promise<void> {
+  const m = await ctx.db.get(membershipId)
+  if (!m) return
+  const stage = await ctx.db.get(m.stageId)
+  if (stage) await ctx.db.patch(stage._id, { count: dec(stage.count) })
+  const camp = await ctx.db.get(m.campaignId)
+  if (camp) await ctx.db.patch(camp._id, { contactCount: dec(camp.contactCount) })
+  await ctx.db.delete(membershipId)
+}
+
+// ---- Tags ----
+
+export async function addTagImpl(
+  ctx: WriteCtx,
+  { contactId, tag, by }: { contactId: Id<"contacts">; tag: string; by?: string },
+): Promise<void> {
+  const t = tag.trim()
+  if (!t) return
+  const c = await ctx.db.get(contactId)
+  if (!c) return
+  const tags = c.tags ?? []
+  if (tags.includes(t)) return
+  await ctx.db.patch(contactId, { tags: [...tags, t] })
+  await logActivity(ctx, { contactId, type: "tag", meta: { added: t }, by })
+}
+
+export async function removeTagImpl(
+  ctx: WriteCtx,
+  { contactId, tag }: { contactId: Id<"contacts">; tag: string },
+): Promise<void> {
+  const c = await ctx.db.get(contactId)
+  if (!c) return
+  await ctx.db.patch(contactId, {
+    tags: (c.tags ?? []).filter((x) => x !== tag),
+  })
+}
+
+// ---- Activity logging ----
+
+export async function addNoteImpl(
+  ctx: WriteCtx,
+  args: {
+    contactId: Id<"contacts">
+    campaignId?: Id<"campaigns">
+    body: string
+    by?: string
+  },
+): Promise<void> {
+  const text = args.body.trim()
+  if (!text) return
+  await logActivity(ctx, {
+    contactId: args.contactId,
+    campaignId: args.campaignId,
+    type: "note",
+    body: text.slice(0, NOTE_MAX),
+    by: args.by,
+  })
+}
+
+export async function logInteractionImpl(
+  ctx: WriteCtx,
+  args: {
+    contactId: Id<"contacts">
+    campaignId?: Id<"campaigns">
+    kind: "call" | "email"
+    body?: string
+    by?: string
+  },
+): Promise<void> {
+  await logActivity(ctx, {
+    contactId: args.contactId,
+    campaignId: args.campaignId,
+    type: args.kind,
+    body: args.body?.trim().slice(0, NOTE_MAX),
+    by: args.by,
+  })
+}
+
+// ---- Public, admin-gated mutations ----
+
+export const createCampaign = mutation({
+  args: {
+    name: v.string(),
+    description: v.optional(v.string()),
+    color: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    return await createCampaignImpl(ctx, args)
+  },
+})
+
+export const moveStage = mutation({
+  args: {
+    membershipId: v.id("memberships"),
+    stageId: v.id("stages"),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx)
+    await moveStageImpl(ctx, { ...args, by: user.email ?? undefined })
+  },
+})
+
+export const deleteContact = mutation({
+  args: { contactId: v.id("contacts") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await deleteContactImpl(ctx, args)
+  },
+})
+
+export const removeFromCampaign = mutation({
+  args: { membershipId: v.id("memberships") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await removeFromCampaignImpl(ctx, args)
+  },
+})
+
+export const addStage = mutation({
+  args: {
+    campaignId: v.optional(v.id("campaigns")),
+    name: v.string(),
+    color: v.string(),
+    type: stageType,
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    return await addStageImpl(ctx, args)
+  },
+})
+
+export const updateStage = mutation({
+  args: {
+    stageId: v.id("stages"),
+    name: v.optional(v.string()),
+    color: v.optional(v.string()),
+    type: v.optional(stageType),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await updateStageImpl(ctx, args)
+  },
+})
+
+export const reorderStages = mutation({
+  args: { orderedIds: v.array(v.id("stages")) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await reorderStagesImpl(ctx, args)
+  },
+})
+
+export const deleteStage = mutation({
+  args: {
+    stageId: v.id("stages"),
+    reassignToStageId: v.optional(v.id("stages")),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await deleteStageImpl(ctx, args)
+  },
+})
+
+export const createContact = mutation({
+  args: {
+    campaignId: v.id("campaigns"),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    company: v.optional(v.string()),
+    title: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx)
+    return await createContactImpl(ctx, { ...args, by: user.email ?? undefined })
+  },
+})
+
+export const addToCampaign = mutation({
+  args: { contactId: v.id("contacts"), campaignId: v.id("campaigns") },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx)
+    await addContactToCampaignImpl(ctx, { ...args, by: user.email ?? undefined })
+  },
+})
+
+export const addTag = mutation({
+  args: { contactId: v.id("contacts"), tag: v.string() },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx)
+    await addTagImpl(ctx, { ...args, by: user.email ?? undefined })
+  },
+})
+
+export const removeTag = mutation({
+  args: { contactId: v.id("contacts"), tag: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx)
+    await removeTagImpl(ctx, args)
+  },
+})
+
+export const addNote = mutation({
+  args: {
+    contactId: v.id("contacts"),
+    campaignId: v.optional(v.id("campaigns")),
+    body: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx)
+    await addNoteImpl(ctx, { ...args, by: user.email ?? undefined })
+  },
+})
+
+export const logInteraction = mutation({
+  args: {
+    contactId: v.id("contacts"),
+    campaignId: v.optional(v.id("campaigns")),
+    kind: v.union(v.literal("call"), v.literal("email")),
+    body: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx)
+    await logInteractionImpl(ctx, { ...args, by: user.email ?? undefined })
+  },
+})

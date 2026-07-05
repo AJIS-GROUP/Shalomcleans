@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
-import { Mail, Lock, ArrowRight } from "lucide-react"
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react"
 import { authClient } from "#/lib/auth-client"
 
 export const Route = createFileRoute("/admin/login")({
@@ -117,6 +117,9 @@ function Field({
   autoComplete?: string
   required?: boolean
 }) {
+  const [revealed, setRevealed] = useState(false)
+  const isPassword = type === "password"
+  const effectiveType = isPassword && revealed ? "text" : type
   return (
     <label className="block">
       <div className="relative">
@@ -124,14 +127,26 @@ function Field({
           {icon}
         </div>
         <input
-          type={type}
+          type={effectiveType}
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
           required={required}
-          className="w-full bg-[#101012] border border-white/5 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#c4f54a]/40 focus:ring-2 focus:ring-[#c4f54a]/10 transition-all"
+          className={`w-full bg-[#101012] border border-white/5 rounded-2xl pl-11 py-3.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#c4f54a]/40 focus:ring-2 focus:ring-[#c4f54a]/10 transition-all ${
+            isPassword ? "pr-11" : "pr-4"
+          }`}
         />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setRevealed((r) => !r)}
+            aria-label={revealed ? "Hide password" : "Show password"}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+          >
+            {revealed ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        )}
       </div>
     </label>
   )
