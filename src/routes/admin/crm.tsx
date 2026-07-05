@@ -20,7 +20,11 @@ import { api } from "../../../convex/_generated/api"
 import type { Doc, Id } from "../../../convex/_generated/dataModel"
 import { Reveal } from "#/components/admin/Reveal"
 import { ImportDialog } from "#/components/admin/crm/ImportDialog"
-import { ConfirmDialog, PromptDialog } from "#/components/admin/crm/dialogs"
+import {
+  Checkbox,
+  ConfirmDialog,
+  PromptDialog,
+} from "#/components/admin/crm/dialogs"
 import { Board } from "#/components/admin/crm/Board"
 import { ContactDrawer } from "#/components/admin/crm/ContactDrawer"
 import { StageEditor } from "#/components/admin/crm/StageEditor"
@@ -546,11 +550,10 @@ function ContactsTable({
   return (
     <div className="rounded-3xl bg-[#101012] border border-white/5 overflow-hidden">
       <div className="flex items-center gap-3 px-4 py-2.5 text-[10px] uppercase tracking-wide text-white/40 border-b border-white/5 bg-white/[0.02]">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={allLoadedSelected}
           onChange={toggleAllLoaded}
-          className="accent-[#c4f54a] w-3.5 h-3.5"
+          ariaLabel="Select all on this page"
         />
         <span className="flex-1">Contact</span>
         <span className="w-32 hidden md:block">Phone</span>
@@ -581,12 +584,11 @@ function ContactsTable({
                 style={{ height: vi.size, transform: `translateY(${vi.start}px)` }}
                 onClick={() => onOpenContact(c._id)}
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={isRowSelected(selection, c._id)}
                   onChange={() => setSelection(toggleRow(selection, c._id))}
                   onClick={(e) => e.stopPropagation()}
-                  className="accent-[#c4f54a] w-3.5 h-3.5"
+                  ariaLabel="Select contact"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="text-white truncate">

@@ -13,7 +13,7 @@ import {
 } from "lucide-react"
 import { api } from "../../../../convex/_generated/api"
 import type { Id } from "../../../../convex/_generated/dataModel"
-import { ConfirmDialog } from "#/components/admin/crm/dialogs"
+import { ChoiceDialog, ConfirmDialog } from "#/components/admin/crm/dialogs"
 import { contactDisplayName } from "#/lib/crm/display"
 
 export function ContactDrawer({
@@ -33,18 +33,31 @@ export function ContactDrawer({
   const [note, setNote] = useState("")
   const [newTag, setNewTag] = useState("")
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [interaction, setInteraction] = useState<null | "call" | "email">(null)
 
   const contact = detail?.contact
 
-  const submitNote = async (kind: "note" | "call" | "email") => {
+  const addNoteNow = async () => {
     const body = note.trim()
-    if (kind === "note") {
-      if (!body) return
-      await addNote({ contactId, body })
-    } else {
-      await logInteraction({ contactId, kind, body: body || undefined })
-    }
+    if (!body) return
+    await addNote({ contactId, body })
     setNote("")
+  }
+
+  const logInteractionNow = async (kind: "call" | "email") => {
+    await logInteraction({ contactId, kind, body: note.trim() || undefined })
+    setNote("")
+  }
+
+  // Ask whether to actually reach out or just log it — unless there's nothing
+  // to dial/email, in which case just log.
+  const startInteraction = (kind: "call" | "email") => {
+    const target = kind === "call" ? contact?.phone : contact?.email
+    if (!target) {
+      void logInteractionNow(kind)
+      return
+    }
+    setInteraction(kind)
   }
 
   return (
@@ -176,9 +189,9 @@ export function ContactDrawer({
                 className="w-full bg-[#101012] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#c4f54a]/40 resize-none"
               />
               <div className="flex gap-1.5 mt-2">
-                <LogButton icon={<StickyNote size={12} />} label="Note" onClick={() => submitNote("note")} />
-                <LogButton icon={<PhoneCall size={12} />} label="Call" onClick={() => submitNote("call")} />
-                <LogButton icon={<Send size={12} />} label="Email" onClick={() => submitNote("email")} />
+                <LogButton icon={<StickyNote size={12} />} label="Note" onClick={addNoteNow} />
+                <LogButton icon={<PhoneCall size={12} />} label="Call" onClick={() => startInteraction("call")} />
+                <LogButton icon={<Send size={12} />} label="Email" onClick={() => startInteraction("email")} />
               </div>
             </div>
 
@@ -222,6 +235,33 @@ export function ContactDrawer({
                 onClose={() => setConfirmDelete(false)}
               />
             )}
+
+            {interaction &&
+              (() => {
+                const kind = interaction
+                const target = kind === "call" ? contact.phone : contact.email
+                return (
+                  <ChoiceDialog
+                    title={`${kind === "call" ? "Call" : "Email"} ${contactDisplayName(contact)}`}
+                    message={target}
+                    primary={{
+                      label: kind === "call" ? "Call now" : "Compose email",
+                      onClick: () => {
+                        if (target) {
+                          window.location.href =
+                            kind === "call" ? `tel:${target}` : `mailto:${target}`
+                        }
+                        void logInteractionNow(kind)
+                      },
+                    }}
+                    secondary={{
+                      label: `Just log the ${kind}`,
+                      onClick: () => void logInteractionNow(kind),
+                    }}
+                    onClose={() => setInteraction(null)}
+                  />
+                )
+              })()}
           </>
         ) : (
           <div className="text-white/30 text-xs py-8 text-center">

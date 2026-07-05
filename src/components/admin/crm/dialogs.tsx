@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { X } from "lucide-react"
+import { Check, X } from "lucide-react"
 
 /** Shared centered modal shell — dark card over a dimmed backdrop. */
 export function Modal({
@@ -93,6 +93,80 @@ export function PromptDialog({
         </div>
       </form>
     </Modal>
+  )
+}
+
+type Action = { label: string; onClick: () => void }
+
+/** A two-option chooser (e.g. "Call now" vs "Just log") plus cancel. */
+export function ChoiceDialog({
+  title,
+  message,
+  primary,
+  secondary,
+  onClose,
+}: {
+  title: string
+  message?: string
+  primary: Action
+  secondary: Action
+  onClose: () => void
+}) {
+  return (
+    <Modal title={title} onClose={onClose}>
+      {message && <p className="text-sm text-white/60 mb-5">{message}</p>}
+      <div className="flex flex-col gap-2">
+        <button
+          onClick={() => {
+            primary.onClick()
+            onClose()
+          }}
+          className="w-full rounded-full bg-[#c4f54a] text-black text-sm font-semibold py-2.5 hover:bg-[#d4ff5a] active:scale-95 transition"
+        >
+          {primary.label}
+        </button>
+        <button
+          onClick={() => {
+            secondary.onClick()
+            onClose()
+          }}
+          className="w-full rounded-full border border-white/10 text-sm text-white/80 py-2.5 hover:bg-white/5 transition-colors"
+        >
+          {secondary.label}
+        </button>
+      </div>
+    </Modal>
+  )
+}
+
+/** A custom-styled checkbox that matches the dark/lime admin theme. */
+export function Checkbox({
+  checked,
+  onChange,
+  onClick,
+  ariaLabel,
+}: {
+  checked: boolean
+  onChange: () => void
+  onClick?: (e: React.MouseEvent) => void
+  ariaLabel?: string
+}) {
+  return (
+    <span className="relative inline-flex items-center justify-center shrink-0">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        onClick={onClick}
+        aria-label={ariaLabel}
+        className="peer appearance-none w-4 h-4 rounded-[5px] border border-white/25 bg-[#0e0e0f] checked:bg-[#c4f54a] checked:border-[#c4f54a] hover:border-white/40 cursor-pointer transition-colors"
+      />
+      <Check
+        size={11}
+        strokeWidth={3}
+        className="absolute text-black opacity-0 peer-checked:opacity-100 pointer-events-none"
+      />
+    </span>
   )
 }
 
