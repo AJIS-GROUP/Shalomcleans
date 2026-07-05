@@ -153,8 +153,14 @@ const BOARD_CARD_LIMIT = 100
 
 export async function boardColumnsImpl(
   ctx: ReadCtx,
-  { campaignId }: { campaignId: Id<"campaigns"> },
+  {
+    campaignId,
+    perColumn = BOARD_CARD_LIMIT,
+  }: { campaignId: Id<"campaigns">; perColumn?: number },
 ) {
+  // Clamp the client-supplied page size so a bad value can't trigger a giant read.
+  const limit = Math.min(Math.max(1, Math.floor(perColumn)), 1000)
+
   const stages = await ctx.db
     .query("stages")
     .withIndex("by_campaign", (q) => q.eq("campaignId", campaignId))
@@ -169,7 +175,7 @@ export async function boardColumnsImpl(
         q.eq("campaignId", campaignId).eq("stageId", stage._id),
       )
       .order("desc")
-      .take(BOARD_CARD_LIMIT)
+      .take(limit)
     const cards: ContactRow[] = []
     for (const m of ms) {
       const c = await ctx.db.get(m.contactId)
@@ -207,7 +213,10 @@ export const getContact = query({
 })
 
 export const boardColumns = query({
-  args: { campaignId: v.id("campaigns") },
+  args: {
+    campaignId: v.id("campaigns"),
+    perColumn: v.optional(v.number()),
+  },
   handler: async (ctx, args) => {
     await requireAdmin(ctx)
     return await boardColumnsImpl(ctx, args)

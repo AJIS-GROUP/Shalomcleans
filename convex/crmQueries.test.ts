@@ -144,4 +144,16 @@ describe("boardColumnsImpl", () => {
     const wonCol = columns.find((c) => c.stage.name === "Won")!
     expect(wonCol.count).toBe(0)
   })
+
+  it("caps cards per stage at perColumn while keeping the full count", async () => {
+    const t = convexTest(schema, modules)
+    const { campaignId } = await seed(t)
+
+    const columns = await t.run((ctx) =>
+      boardColumnsImpl(ctx, { campaignId, perColumn: 2 }),
+    )
+    const newCol = columns.find((c) => c.stage.name === "New")!
+    expect(newCol.count).toBe(3) // full count still reported
+    expect(newCol.cards).toHaveLength(2) // but only perColumn cards loaded
+  })
 })

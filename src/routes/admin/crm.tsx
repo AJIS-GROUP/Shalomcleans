@@ -56,7 +56,7 @@ function CrmPage() {
   const [importOpen, setImportOpen] = useState(false)
   const [newCampaignOpen, setNewCampaignOpen] = useState(false)
   const [confirmDeleteCampaign, setConfirmDeleteCampaign] = useState(false)
-  const [view, setView] = useState<"table" | "board">("table")
+  const [view, setView] = useState<"table" | "board">("board")
   const [stageEditorOpen, setStageEditorOpen] = useState(false)
   const [activeContactId, setActiveContactId] = useState<Id<"contacts"> | null>(
     null,

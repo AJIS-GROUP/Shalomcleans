@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { createPortal } from "react-dom"
 import {
   DragDropContext,
@@ -29,15 +30,20 @@ export function Board({
   campaignId: Id<"campaigns">
   onOpenContact: (contactId: Id<"contacts">) => void
 }) {
-  const columns = useQuery(api.crmQueries.boardColumns, { campaignId })
+  const PAGE = 60
+  const [perColumn, setPerColumn] = useState(PAGE)
+  const columns = useQuery(api.crmQueries.boardColumns, { campaignId, perColumn })
   // Optimistic: the card jumps columns instantly, before the server round-trip.
   const moveStage = useMutation(api.crmMutations.moveStage).withOptimisticUpdate(
     (store, { membershipId, stageId }) => {
-      const current = store.getQuery(api.crmQueries.boardColumns, { campaignId })
+      const current = store.getQuery(api.crmQueries.boardColumns, {
+        campaignId,
+        perColumn,
+      })
       if (!current) return
       store.setQuery(
         api.crmQueries.boardColumns,
-        { campaignId },
+        { campaignId, perColumn },
         applyOptimisticMove(current, membershipId, stageId),
       )
     },
@@ -121,9 +127,13 @@ export function Board({
                   )}
                 </div>
                 {col.count > col.cards.length && (
-                  <div className="text-[10px] text-white/30 text-center pt-2">
-                    +{col.count - col.cards.length} more — use the table to see all
-                  </div>
+                  <button
+                    onClick={() => setPerColumn((p) => p + PAGE)}
+                    className="w-full text-[11px] text-white/50 hover:text-white text-center pt-2 pb-1 transition-colors"
+                  >
+                    Load more ({(col.count - col.cards.length).toLocaleString()}{" "}
+                    hidden)
+                  </button>
                 )}
               </div>
             )}
