@@ -2,7 +2,7 @@ import { mutation } from "./_generated/server"
 import { v } from "convex/values"
 import type { Id } from "./_generated/dataModel"
 import { requireAdmin } from "./auth"
-import { logActivity, type WriteCtx } from "./crm"
+import { bumpCounts, logActivity, upsertRow, type WriteCtx } from "./crm"
 import { stageType } from "./schema"
 
 type StageType = "active" | "won" | "lost"
@@ -66,6 +66,52 @@ export async function createCampaignImpl(
     })
   }
   return campaignId
+}
+
+/**
+ * Manually add a single contact to a campaign's first stage. Dedupes by email
+ * (then phone) exactly like the importer, and rejects a row with no way to
+ * reach the person.
+ */
+export async function createContactImpl(
+  ctx: WriteCtx,
+  args: {
+    campaignId: Id<"campaigns">
+    name?: string
+    email?: string
+    phone?: string
+    company?: string
+    title?: string
+    by?: string
+  },
+): Promise<"inserted" | "updated" | "skipped"> {
+  const stages = await ctx.db
+    .query("stages")
+    .withIndex("by_campaign", (q) => q.eq("campaignId", args.campaignId))
+    .collect()
+  stages.sort((a, b) => a.order - b.order)
+  const first = stages[0]
+  if (!first) throw new Error("Campaign has no stages")
+
+  const outcome = await upsertRow(ctx, {
+    campaignId: args.campaignId,
+    stageId: first._id,
+    by: args.by,
+    row: {
+      name: args.name,
+      email: args.email,
+      phone: args.phone,
+      company: args.company,
+      title: args.title,
+    },
+  })
+  if (outcome === "invalid") {
+    throw new Error("Add an email or phone number for this contact")
+  }
+  if (outcome === "inserted" || outcome === "updated") {
+    await bumpCounts(ctx, args.campaignId, first._id, 1)
+  }
+  return outcome
 }
 
 /** Add an existing contact to a campaign's first stage, unless already a member. */
@@ -420,6 +466,21 @@ export const deleteStage = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx)
     await deleteStageImpl(ctx, args)
+  },
+})
+
+export const createContact = mutation({
+  args: {
+    campaignId: v.id("campaigns"),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    company: v.optional(v.string()),
+    title: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireAdmin(ctx)
+    return await createContactImpl(ctx, { ...args, by: user.email ?? undefined })
   },
 })
 

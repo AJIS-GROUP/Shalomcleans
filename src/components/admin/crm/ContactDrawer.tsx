@@ -49,16 +49,9 @@ export function ContactDrawer({
     setNote("")
   }
 
-  // Ask whether to actually reach out or just log it — unless there's nothing
-  // to dial/email, in which case just log.
-  const startInteraction = (kind: "call" | "email") => {
-    const target = kind === "call" ? contact?.phone : contact?.email
-    if (!target) {
-      void logInteractionNow(kind)
-      return
-    }
-    setInteraction(kind)
-  }
+  // Always ask whether to actually reach out or just log it (the dialog adapts
+  // when there's no phone/email to act on).
+  const startInteraction = (kind: "call" | "email") => setInteraction(kind)
 
   return (
     <div
@@ -240,24 +233,39 @@ export function ContactDrawer({
               (() => {
                 const kind = interaction
                 const target = kind === "call" ? contact.phone : contact.email
+                const reachLabel = kind === "call" ? "Call now" : "Compose email"
                 return (
                   <ChoiceDialog
                     title={`${kind === "call" ? "Call" : "Email"} ${contactDisplayName(contact)}`}
-                    message={target}
-                    primary={{
-                      label: kind === "call" ? "Call now" : "Compose email",
-                      onClick: () => {
-                        if (target) {
-                          window.location.href =
-                            kind === "call" ? `tel:${target}` : `mailto:${target}`
-                        }
-                        void logInteractionNow(kind)
-                      },
-                    }}
-                    secondary={{
-                      label: `Just log the ${kind}`,
-                      onClick: () => void logInteractionNow(kind),
-                    }}
+                    message={
+                      target ??
+                      `No ${kind === "call" ? "phone number" : "email"} on file — you can still log it.`
+                    }
+                    primary={
+                      target
+                        ? {
+                            label: reachLabel,
+                            onClick: () => {
+                              window.location.href =
+                                kind === "call"
+                                  ? `tel:${target}`
+                                  : `mailto:${target}`
+                              void logInteractionNow(kind)
+                            },
+                          }
+                        : {
+                            label: `Log the ${kind}`,
+                            onClick: () => void logInteractionNow(kind),
+                          }
+                    }
+                    secondary={
+                      target
+                        ? {
+                            label: `Just log the ${kind}`,
+                            onClick: () => void logInteractionNow(kind),
+                          }
+                        : { label: "Cancel", onClick: () => {} }
+                    }
                     onClose={() => setInteraction(null)}
                   />
                 )

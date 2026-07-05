@@ -15,11 +15,13 @@ import {
   LayoutList,
   Columns3,
   Settings2,
+  UserPlus,
 } from "lucide-react"
 import { api } from "../../../convex/_generated/api"
 import type { Doc, Id } from "../../../convex/_generated/dataModel"
 import { Reveal } from "#/components/admin/Reveal"
 import { ImportDialog } from "#/components/admin/crm/ImportDialog"
+import { AddContactDialog } from "#/components/admin/crm/AddContactDialog"
 import {
   Checkbox,
   ConfirmDialog,
@@ -54,6 +56,7 @@ function CrmPage() {
   const [tag] = useState<string | null>(null)
   const [selection, setSelection] = useState<Selection>(emptySelection())
   const [importOpen, setImportOpen] = useState(false)
+  const [addContactOpen, setAddContactOpen] = useState(false)
   const [newCampaignOpen, setNewCampaignOpen] = useState(false)
   const [confirmDeleteCampaign, setConfirmDeleteCampaign] = useState(false)
   const [view, setView] = useState<"table" | "board">("board")
@@ -173,6 +176,15 @@ function CrmPage() {
                   title="Edit pipeline stages"
                 >
                   <Settings2 size={14} />
+                </button>
+              )}
+              {campaignId && (
+                <button
+                  onClick={() => setAddContactOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 text-xs text-white/80 px-4 py-2 hover:bg-white/5 transition-colors"
+                  title="Add a single contact manually"
+                >
+                  <UserPlus size={14} /> New contact
                 </button>
               )}
               {campaignId && (
@@ -305,6 +317,16 @@ function CrmPage() {
             campaigns?.find((c) => c._id === campaignId)?.name ?? "campaign"
           }
           onClose={() => setImportOpen(false)}
+        />
+      )}
+
+      {addContactOpen && campaignId && (
+        <AddContactDialog
+          campaignId={campaignId}
+          campaignName={
+            campaigns?.find((c) => c._id === campaignId)?.name ?? "campaign"
+          }
+          onClose={() => setAddContactOpen(false)}
         />
       )}
     </div>

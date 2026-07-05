@@ -129,7 +129,27 @@ export async function logActivity(
  * campaign. Dedupe key is lowercased email, falling back to a digits-only phone.
  * Existing contacts keep their values — only blank fields are filled.
  */
-async function upsertRow(
+/** Adjust a campaign's and a stage's denormalised counts by delta (clamped ≥0). */
+export async function bumpCounts(
+  ctx: WriteCtx,
+  campaignId: Id<"campaigns">,
+  stageId: Id<"stages">,
+  delta: number,
+): Promise<void> {
+  if (delta === 0) return
+  const camp = await ctx.db.get(campaignId)
+  if (camp) {
+    await ctx.db.patch(campaignId, {
+      contactCount: Math.max(0, camp.contactCount + delta),
+    })
+  }
+  const stage = await ctx.db.get(stageId)
+  if (stage) {
+    await ctx.db.patch(stageId, { count: Math.max(0, (stage.count ?? 0) + delta) })
+  }
+}
+
+export async function upsertRow(
   ctx: WriteCtx,
   opts: {
     campaignId: Id<"campaigns">
@@ -291,21 +311,7 @@ export const importChunk = internalMutation({
     }
 
     // Each inserted/updated row added a fresh membership at this stage.
-    const newMembers = inserted + updated
-    if (newMembers > 0) {
-      const camp = await ctx.db.get(campaignId)
-      if (camp) {
-        await ctx.db.patch(campaignId, {
-          contactCount: camp.contactCount + newMembers,
-        })
-      }
-      const stage = await ctx.db.get(stageId)
-      if (stage) {
-        await ctx.db.patch(stageId, {
-          count: (stage.count ?? 0) + newMembers,
-        })
-      }
-    }
+    await bumpCounts(ctx, campaignId, stageId, inserted + updated)
 
     return { inserted, updated, skipped, invalid }
   },
