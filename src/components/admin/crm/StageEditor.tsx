@@ -1,7 +1,9 @@
+import { useState } from "react"
 import { useMutation, useQuery } from "convex/react"
 import { X, Plus, ArrowUp, ArrowDown, Trash2 } from "lucide-react"
 import { api } from "../../../../convex/_generated/api"
 import type { Doc, Id } from "../../../../convex/_generated/dataModel"
+import { ConfirmDialog } from "#/components/admin/crm/dialogs"
 
 type StageType = "active" | "won" | "lost"
 
@@ -17,6 +19,11 @@ export function StageEditor({
   const updateStage = useMutation(api.crmMutations.updateStage)
   const reorderStages = useMutation(api.crmMutations.reorderStages)
   const deleteStage = useMutation(api.crmMutations.deleteStage)
+  const [pending, setPending] = useState<{
+    stage: Doc<"stages">
+    reassignTo?: Doc<"stages">
+    blocked?: boolean
+  } | null>(null)
 
   const move = (index: number, dir: -1 | 1) => {
     if (!stages) return
@@ -32,19 +39,12 @@ export function StageEditor({
     const others = stages.filter((s) => s._id !== stage._id)
     if ((stage.count ?? 0) > 0) {
       if (others.length === 0) {
-        window.alert("Add another stage before deleting the only one with contacts.")
+        setPending({ stage, blocked: true })
         return
       }
-      const target = others[0]
-      if (
-        !window.confirm(
-          `Move ${stage.count} contacts to "${target.name}" and delete "${stage.name}"?`,
-        )
-      )
-        return
-      void deleteStage({ stageId: stage._id, reassignToStageId: target._id })
+      setPending({ stage, reassignTo: others[0] })
     } else {
-      void deleteStage({ stageId: stage._id })
+      setPending({ stage })
     }
   }
 
@@ -144,6 +144,40 @@ export function StageEditor({
           <Plus size={13} /> Add stage
         </button>
       </div>
+
+      {pending &&
+        (pending.blocked ? (
+          <ConfirmDialog
+            title="Can't delete this stage"
+            message={`"${pending.stage.name}" still has contacts and it's the only stage. Add another stage (or move the contacts) first.`}
+            confirmLabel="OK"
+            onConfirm={() => {}}
+            onClose={() => setPending(null)}
+          />
+        ) : pending.reassignTo ? (
+          <ConfirmDialog
+            title="Delete stage?"
+            message={`Move ${pending.stage.count} contact${pending.stage.count === 1 ? "" : "s"} to "${pending.reassignTo.name}" and delete "${pending.stage.name}".`}
+            confirmLabel="Move & delete"
+            danger
+            onConfirm={() =>
+              void deleteStage({
+                stageId: pending.stage._id,
+                reassignToStageId: pending.reassignTo!._id,
+              })
+            }
+            onClose={() => setPending(null)}
+          />
+        ) : (
+          <ConfirmDialog
+            title="Delete stage?"
+            message={`Delete "${pending.stage.name}"?`}
+            confirmLabel="Delete"
+            danger
+            onConfirm={() => void deleteStage({ stageId: pending.stage._id })}
+            onClose={() => setPending(null)}
+          />
+        ))}
     </div>
   )
 }

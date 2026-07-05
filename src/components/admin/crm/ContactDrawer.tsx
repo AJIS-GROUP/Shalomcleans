@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { api } from "../../../../convex/_generated/api"
 import type { Id } from "../../../../convex/_generated/dataModel"
+import { ConfirmDialog } from "#/components/admin/crm/dialogs"
 
 export function ContactDrawer({
   contactId,
@@ -30,6 +31,7 @@ export function ContactDrawer({
 
   const [note, setNote] = useState("")
   const [newTag, setNewTag] = useState("")
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const contact = detail?.contact
 
@@ -200,16 +202,25 @@ export function ContactDrawer({
             </div>
 
             <button
-              onClick={async () => {
-                if (window.confirm("Delete this contact everywhere?")) {
-                  await deleteContact({ contactId })
-                  onClose()
-                }
-              }}
+              onClick={() => setConfirmDelete(true)}
               className="mt-7 inline-flex items-center gap-2 text-xs text-red-300 hover:bg-red-500/15 border border-red-500/20 rounded-full px-4 py-2 transition-colors"
             >
               <Trash2 size={13} /> Delete contact
             </button>
+
+            {confirmDelete && (
+              <ConfirmDialog
+                title="Delete contact?"
+                message="This permanently removes the contact and their history from every campaign."
+                confirmLabel="Delete"
+                danger
+                onConfirm={async () => {
+                  await deleteContact({ contactId })
+                  onClose()
+                }}
+                onClose={() => setConfirmDelete(false)}
+              />
+            )}
           </>
         ) : (
           <div className="text-white/30 text-xs py-8 text-center">

@@ -20,6 +20,7 @@ import { api } from "../../../convex/_generated/api"
 import type { Doc, Id } from "../../../convex/_generated/dataModel"
 import { Reveal } from "#/components/admin/Reveal"
 import { ImportDialog } from "#/components/admin/crm/ImportDialog"
+import { ConfirmDialog, PromptDialog } from "#/components/admin/crm/dialogs"
 import { Board } from "#/components/admin/crm/Board"
 import { ContactDrawer } from "#/components/admin/crm/ContactDrawer"
 import { StageEditor } from "#/components/admin/crm/StageEditor"
@@ -48,6 +49,7 @@ function CrmPage() {
   const [tag] = useState<string | null>(null)
   const [selection, setSelection] = useState<Selection>(emptySelection())
   const [importOpen, setImportOpen] = useState(false)
+  const [newCampaignOpen, setNewCampaignOpen] = useState(false)
   const [view, setView] = useState<"table" | "board">("table")
   const [stageEditorOpen, setStageEditorOpen] = useState(false)
   const [activeContactId, setActiveContactId] = useState<Id<"contacts"> | null>(
@@ -110,10 +112,9 @@ function CrmPage() {
       setFacet({})
     })
 
-  const newCampaign = async () => {
-    const name = window.prompt("Campaign name")?.trim()
-    if (!name) return
+  const createNamedCampaign = async (name: string) => {
     const id = await createCampaign({ name })
+    setNewCampaignOpen(false)
     chooseCampaign(id)
   }
 
@@ -123,7 +124,7 @@ function CrmPage() {
         campaigns={campaigns}
         activeId={campaignId}
         onChoose={chooseCampaign}
-        onNew={newCampaign}
+        onNew={() => setNewCampaignOpen(true)}
       />
 
       <div className="flex-1 min-w-0">
@@ -249,6 +250,17 @@ function CrmPage() {
         <StageEditor
           campaignId={campaignId}
           onClose={() => setStageEditorOpen(false)}
+        />
+      )}
+
+      {newCampaignOpen && (
+        <PromptDialog
+          title="New campaign"
+          label="Campaign name"
+          placeholder="Miami cold — Feb"
+          submitLabel="Create"
+          onSubmit={createNamedCampaign}
+          onClose={() => setNewCampaignOpen(false)}
         />
       )}
 
@@ -617,6 +629,7 @@ function BulkBar({
 }) {
   const startBulk = useAction(api.crmBulk.startBulk)
   const [busy, setBusy] = useState(false)
+  const [dialog, setDialog] = useState<null | "tag" | "delete">(null)
 
   const selectionArg = () =>
     selection.mode === "all"
@@ -696,10 +709,7 @@ function BulkBar({
           icon={<Tag size={13} />}
           label="Tag"
           disabled={busy}
-          onClick={() => {
-            const t = window.prompt("Tag to add")?.trim()
-            if (t) run({ kind: "addTag", tag: t })
-          }}
+          onClick={() => setDialog("tag")}
         />
         <BulkButton
           icon={<Download size={13} />}
@@ -712,10 +722,7 @@ function BulkBar({
           label="Delete"
           danger
           disabled={busy}
-          onClick={() => {
-            if (window.confirm(`Delete ${count.toLocaleString()} contacts?`))
-              run({ kind: "delete" })
-          }}
+          onClick={() => setDialog("delete")}
         />
         <button
           onClick={onClear}
@@ -724,6 +731,30 @@ function BulkBar({
           <X size={13} />
         </button>
       </div>
+
+      {dialog === "tag" && (
+        <PromptDialog
+          title="Add a tag"
+          label={`Tag for ${count.toLocaleString()} contact${count === 1 ? "" : "s"}`}
+          placeholder="vip"
+          submitLabel="Add tag"
+          onSubmit={(tag) => {
+            setDialog(null)
+            void run({ kind: "addTag", tag })
+          }}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog === "delete" && (
+        <ConfirmDialog
+          title="Delete contacts?"
+          message={`This permanently deletes ${count.toLocaleString()} contact${count === 1 ? "" : "s"} everywhere.`}
+          confirmLabel="Delete"
+          danger
+          onConfirm={() => void run({ kind: "delete" })}
+          onClose={() => setDialog(null)}
+        />
+      )}
     </div>
   )
 }
