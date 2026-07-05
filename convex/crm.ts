@@ -1,7 +1,10 @@
 import { internalMutation } from "./_generated/server"
-import type { MutationCtx } from "./_generated/server"
-import type { Doc, Id } from "./_generated/dataModel"
+import type { Doc, Id, DataModel } from "./_generated/dataModel"
 import { v, type Infer } from "convex/values"
+import type { GenericDatabaseWriter } from "convex/server"
+
+/** Minimal writable ctx — lets helpers run under both real mutations and tests. */
+export type WriteCtx = { db: GenericDatabaseWriter<DataModel> }
 import { activityType } from "./schema"
 
 type ActivityKind = Infer<typeof activityType>
@@ -88,7 +91,7 @@ type Outcome = "inserted" | "updated" | "skipped" | "invalid"
 
 /** True-ish (returns the doc) if any contact already holds this dedupe key. */
 async function keyOwner(
-  ctx: MutationCtx,
+  ctx: WriteCtx,
   index: "by_email" | "by_phone",
   field: "emailKey" | "phoneKey",
   key: string,
@@ -99,8 +102,8 @@ async function keyOwner(
     .first()
 }
 
-async function logActivity(
-  ctx: MutationCtx,
+export async function logActivity(
+  ctx: WriteCtx,
   args: {
     contactId: Id<"contacts">
     campaignId?: Id<"campaigns">
@@ -127,7 +130,7 @@ async function logActivity(
  * Existing contacts keep their values — only blank fields are filled.
  */
 async function upsertRow(
-  ctx: MutationCtx,
+  ctx: WriteCtx,
   opts: {
     campaignId: Id<"campaigns">
     stageId: Id<"stages">

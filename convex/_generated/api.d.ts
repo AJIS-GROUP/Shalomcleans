@@ -15,6 +15,7 @@ import type * as calls from "../calls.js";
 import type * as crm from "../crm.js";
 import type * as crmImport from "../crmImport.js";
 import type * as crmImportNode from "../crmImportNode.js";
+import type * as crmMutations from "../crmMutations.js";
 import type * as crmQueries from "../crmQueries.js";
 import type * as crons from "../crons.js";
 import type * as devTools from "../devTools.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   crm: typeof crm;
   crmImport: typeof crmImport;
   crmImportNode: typeof crmImportNode;
+  crmMutations: typeof crmMutations;
   crmQueries: typeof crmQueries;
   crons: typeof crons;
   devTools: typeof devTools;
