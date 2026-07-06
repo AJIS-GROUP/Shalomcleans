@@ -26,11 +26,6 @@ const submitArgs = {
   phone: v.string(),
   zip: v.string(),
   service: v.string(),
-  // Accepted but ignored. The live site may still send a street address until
-  // its frontend is redeployed, and Convex rejects calls with unknown args, so
-  // tolerate the legacy field during the transition. Safe to remove once the
-  // deployed frontend no longer sends it.
-  address: v.optional(v.string()),
 }
 
 export const submit = action({
