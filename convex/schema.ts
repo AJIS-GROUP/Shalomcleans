@@ -45,6 +45,9 @@ export default defineSchema({
     email: v.string(),
     phone: v.string(),
     zip: v.string(),
+    // Address/city/state are no longer collected on the quote form (the service
+    // address is captured at the BookingKoala scheduling step). Kept as optional
+    // so historical leads that stored them remain valid.
     address: v.optional(v.string()),
     city: v.optional(v.string()),
     state: v.optional(v.string()),

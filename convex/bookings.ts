@@ -25,8 +25,12 @@ const submitArgs = {
   email: v.string(),
   phone: v.string(),
   zip: v.string(),
-  address: v.string(),
   service: v.string(),
+  // Accepted but ignored. The live site may still send a street address until
+  // its frontend is redeployed, and Convex rejects calls with unknown args, so
+  // tolerate the legacy field during the transition. Safe to remove once the
+  // deployed frontend no longer sends it.
+  address: v.optional(v.string()),
 }
 
 export const submit = action({
@@ -36,12 +40,7 @@ export const submit = action({
     const trimmedName = args.name.trim().slice(0, 100)
     const trimmedEmail = args.email.trim().toLowerCase().slice(0, 200)
     const trimmedZip = args.zip.trim()
-    const trimmedAddress = args.address.trim().slice(0, 200)
     const trimmedService = args.service.trim()
-
-    if (trimmedAddress.length < 5) {
-      return { ok: false, error: "Please enter your street address" }
-    }
 
     if (trimmedName.length < 2) {
       return { ok: false, error: "Name must be at least 2 characters" }
@@ -94,14 +93,13 @@ export const submit = action({
       return { ok: false, error: "Too many requests for this email. Please try again later." }
     }
 
-    // 3) Insert lead (internal mutation). Address is trusted as typed — the
-    //    Vapi agent confirms it on the call.
+    // 3) Insert lead (internal mutation). The customer's service address is
+    //    collected later at the BookingKoala scheduling step, not on this form.
     const leadId = await ctx.runMutation(internal.leads.createInternal, {
       name: trimmedName,
       email: trimmedEmail,
       phone: e164,
       zip: trimmedZip,
-      address: trimmedAddress,
       service: trimmedService,
     })
 
@@ -144,7 +142,6 @@ export const submit = action({
           email: trimmedEmail,
           phone: e164,
           service: trimmedService,
-          address: trimmedAddress,
           zip: trimmedZip,
         },
         metadata: { leadId },
@@ -183,9 +180,6 @@ type CustomerInfo = {
   email: string
   phone: string
   service: string
-  address: string
-  city?: string
-  state?: string
   zip: string
 }
 
@@ -198,35 +192,30 @@ function buildFirstMessage(c: CustomerInfo): string {
 }
 
 function buildSystemPrompt(c: CustomerInfo): string {
-  const locality = [c.city, c.state].filter(Boolean).join(", ")
-  const fullAddress = locality
-    ? `${c.address}, ${locality} ${c.zip}`
-    : `${c.address}, ${c.zip}`
   return [
     "You are Sarah, a warm and concise booking assistant for Shalom Cleans, a residential cleaning service in the United States.",
     "",
-    "The customer just submitted a booking request on our website. You are returning the call to CONFIRM their intent. You do NOT schedule the appointment yourself — after you confirm, the customer will receive an email with a link to pick their preferred time and complete the booking.",
+    "The customer just submitted a booking request on our website. You are returning the call to CONFIRM their intent. You do NOT schedule the appointment yourself. After you confirm, the customer will receive an email with a link to pick their preferred time and complete the booking. They enter their service address on that booking page, so you do NOT need to ask for it.",
     "",
-    "Customer info already on file (do NOT ask them to repeat these — confirm only):",
+    "Customer info already on file (do NOT ask them to repeat these, confirm only):",
     `- Name: ${c.name}`,
     `- Phone: ${c.phone}`,
     `- Email: ${c.email}`,
     `- Service requested: ${c.service} cleaning`,
-    `- Address: ${fullAddress}`,
     "",
     "Your job, in order:",
     "1. Greet them by first name and ask if it's a good time to talk for a minute.",
-    "2. Confirm the service and the address out loud — wait for a yes.",
+    "2. Confirm the service they requested out loud and wait for a yes.",
     "3. Ask if there are any special instructions for the cleaning team (pets, gate codes, problem areas, parking).",
     "4. Once they've confirmed and shared any notes, call the `confirmBookingEmail` tool with a single `notes` field (a short summary of any special instructions, or an empty string if there are none).",
-    "5. After the tool returns, tell the customer: \"Perfect. I'm sending you an email right now with a link to complete your booking — you'll just tap it, pick your time, and you're all set. It should land in your inbox in the next minute or so.\" Then thank them and end the call warmly.",
+    "5. After the tool returns, tell the customer: \"Perfect. I'm sending you an email right now with a link to complete your booking. You'll just tap it, pick your time, and you're all set. It should land in your inbox in the next minute or so.\" Then thank them and end the call warmly.",
     "",
     "Important rules:",
-    "- Never promise a specific date or time — the customer picks that on the link.",
+    "- Never promise a specific date or time. The customer picks that on the link.",
     "- Never quote prices.",
     "- The email link is required to finalize the booking. Make this clear without being pushy.",
     "- If they decline or hesitate, offer to send the email anyway so they can complete it when they're ready, then call `confirmBookingEmail` and end politely.",
-    "- If they explicitly refuse to receive the email, do NOT call the tool — end the call politely.",
+    "- If they explicitly refuse to receive the email, do NOT call the tool. End the call politely.",
     "",
     "Style:",
     "- Speak naturally, no lists or bullet points out loud.",
@@ -276,9 +265,6 @@ async function startOutboundCall(input: {
           email: input.customer.email,
           phone: input.customer.phone,
           service: input.customer.service,
-          address: input.customer.address,
-          city: input.customer.city ?? "",
-          state: input.customer.state ?? "",
           zip: input.customer.zip,
         },
         metadata: input.metadata,

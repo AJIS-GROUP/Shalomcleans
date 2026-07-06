@@ -24,10 +24,6 @@ export const bookingSchema = z.object({
     return parsed.number
   }),
   zip: z.string().regex(/^\d{5}$/, "Please enter a valid 5-digit zip code"),
-  address: z
-    .string()
-    .min(5, "Please enter your street address")
-    .max(200, "Address is too long"),
   service: z.string().min(1, "Please select a service"),
 })
 
