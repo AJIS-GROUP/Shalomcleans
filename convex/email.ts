@@ -12,9 +12,6 @@ type LeadEmailContext = {
   firstName: string
   email: string
   service: string
-  address: string | undefined
-  city: string | undefined
-  state: string | undefined
   zip: string
   notes: string | undefined
 }
@@ -32,11 +29,6 @@ function buildBookingLink(token: string, siteUrl: string): string {
   return `${siteUrl.replace(/\/$/, "")}/r/book/${encodeURIComponent(token)}`
 }
 
-function fullAddress(c: LeadEmailContext): string {
-  const cityState = [c.city, c.state].filter(Boolean).join(", ")
-  return [c.address, cityState, c.zip].filter(Boolean).join(", ")
-}
-
 export function renderBookingEmailHtml(
   c: LeadEmailContext,
   link: string,
@@ -44,12 +36,11 @@ export function renderBookingEmailHtml(
 ): string {
   const firstName = escapeHtml(c.firstName || "there")
   const service = escapeHtml(c.service)
-  const addr = escapeHtml(fullAddress(c) || "—")
   const notes = c.notes ? escapeHtml(c.notes) : ""
   const safeSite = siteUrl.replace(/\/$/, "")
   const logoUrl = `${safeSite}/shalomcleans.webp`
   const preheader =
-    "One step left — tap the button to pick your time and complete your booking."
+    "Pick your time and your Shalom Cleans booking is done."
 
   return `<!doctype html>
 <html lang="en">
@@ -109,7 +100,7 @@ export function renderBookingEmailHtml(
 
             <tr>
               <td class="text-muted" style="padding:16px 40px 8px 40px;font-size:16px;line-height:1.55;color:rgba(0,0,0,0.6);">
-                Thanks for the call. Tap the button below to pick your preferred date and time — it takes about 30 seconds. Your booking isn't confirmed until you do.
+                Thanks for the call. Tap the button below to pick a date and time. It takes about 30 seconds, and your booking isn't confirmed until you do.
               </td>
             </tr>
 
@@ -147,10 +138,6 @@ export function renderBookingEmailHtml(
                           <td class="text-faint" style="font-size:12px;color:rgba(0,0,0,0.45);padding:6px 0;width:90px;">Service</td>
                           <td class="text-primary" style="font-size:14px;color:#0a0a0b;padding:6px 0;font-weight:500;">${service}</td>
                         </tr>
-                        <tr>
-                          <td class="text-faint" style="font-size:12px;color:rgba(0,0,0,0.45);padding:6px 0;width:90px;vertical-align:top;">Address</td>
-                          <td class="text-primary" style="font-size:14px;color:#0a0a0b;padding:6px 0;font-weight:500;">${addr}</td>
-                        </tr>
                         ${notes ? `<tr>
                           <td class="text-faint" style="font-size:12px;color:rgba(0,0,0,0.45);padding:6px 0;width:90px;vertical-align:top;">Notes</td>
                           <td class="text-primary" style="font-size:14px;color:#0a0a0b;padding:6px 0;font-weight:500;">${notes}</td>
@@ -184,7 +171,7 @@ export function renderBookingEmailHtml(
                   <tr>
                     <td style="padding:6px 0;" class="text-muted">
                       <span class="text-primary" style="color:#0a0a0b;font-weight:600;">3.</span>
-                      <span style="color:rgba(0,0,0,0.6);"> &nbsp;Our cleaning team arrives on the day, fully insured and ready to go.</span>
+                      <span style="color:rgba(0,0,0,0.6);"> &nbsp;Our cleaning team shows up on the day, fully insured.</span>
                     </td>
                   </tr>
                 </table>
@@ -200,7 +187,7 @@ export function renderBookingEmailHtml(
             <tr>
               <td style="padding:0 40px 36px 40px;" align="center">
                 <div class="text-faint" style="font-size:12px;color:rgba(0,0,0,0.45);line-height:1.55;">
-                  Need a hand? Reply to this email or call us — we read every message.
+                  Need a hand? Just reply to this email. We read every one.
                 </div>
                 <div style="margin-top:18px;">
                   <a href="${safeSite}" class="footer-link" style="font-size:12px;color:rgba(0,0,0,0.5);text-decoration:none;margin:0 8px;">shalomcleans.com</a>
@@ -224,25 +211,24 @@ export function renderBookingEmailText(c: LeadEmailContext, link: string): strin
   const lines = [
     `Hi ${c.firstName || "there"},`,
     "",
-    "Thanks for the call. You're one step away from a confirmed booking — tap the link below to pick your preferred date and time. It takes about 30 seconds.",
+    "Thanks for the call. You're one step from a confirmed booking. Tap the link below to pick your date and time. It takes about 30 seconds.",
     "",
     `Complete your booking: ${link}`,
     "",
     "Your request:",
     `- Service: ${c.service}`,
-    `- Address: ${fullAddress(c) || "—"}`,
   ]
   if (c.notes) lines.push(`- Notes: ${c.notes}`)
   lines.push(
     "",
     "What happens next:",
     "1. Tap the link and pick a time on our scheduler.",
-    "2. You'll receive an instant confirmation.",
-    "3. Our cleaning team arrives on the day, fully insured.",
+    "2. We'll email you a confirmation.",
+    "3. Our cleaning team shows up on the day, fully insured.",
     "",
-    "Need a hand? Reply to this email.",
+    "Need a hand? Just reply to this email.",
     "",
-    "— Shalom Cleans",
+    "Shalom Cleans",
     "shalomcleans.com · Atlanta Metro",
   )
   return lines.join("\n")
@@ -320,9 +306,6 @@ export const sendBookingEmail = internalAction({
       firstName,
       email: lead.email,
       service: lead.service,
-      address: lead.address,
-      city: lead.city,
-      state: lead.state,
       zip: lead.zip,
       notes: lead.notes,
     }

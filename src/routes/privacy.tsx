@@ -43,7 +43,7 @@ function PrivacyPage() {
           <li>Your full name</li>
           <li>Email address</li>
           <li>Phone number</li>
-          <li>Service address and ZIP code</li>
+          <li>ZIP code</li>
           <li>The cleaning service you are interested in</li>
         </ul>
         <p>

@@ -177,6 +177,9 @@ function LeadDrawer({
   lead: Doc<"leads">
   onClose: () => void
 }) {
+  // Address is no longer collected. Older leads may still have one on file, so
+  // keep showing it when present for backward compatibility.
+  const address = formatAddress(lead)
   return (
     <div
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-stretch justify-end"
@@ -207,11 +210,9 @@ function LeadDrawer({
         <DetailRow icon={<Mail size={14} />} label="Email" value={lead.email} />
         <DetailRow icon={<Phone size={14} />} label="Phone" value={lead.phone} />
         <DetailRow icon={<Users size={14} />} label="Service" value={lead.service} />
-        <DetailRow
-          icon={<MapPin size={14} />}
-          label="Address"
-          value={formatAddress(lead) ?? "—"}
-        />
+        {address && (
+          <DetailRow icon={<MapPin size={14} />} label="Address" value={address} />
+        )}
         <DetailRow icon={<MapPin size={14} />} label="ZIP" value={lead.zip} />
 
         {lead.vapiCallId && (
