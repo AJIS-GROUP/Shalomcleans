@@ -1,0 +1,24 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "feat/crm",
+    "feat/native-booking-seo",
+    "main",
+    "origin",
+    "rollback/pre-native-booking"
+  ],
+  "parent": {
+    "feat/crm": "main",
+    "feat/native-booking-seo": "main",
+    "main": null,
+    "origin": "main",
+    "rollback/pre-native-booking": "main"
+  },
+  "order": [
+    "main",
+    "feat/crm",
+    "feat/native-booking-seo",
+    "origin",
+    "rollback/pre-native-booking"
+  ]
+}

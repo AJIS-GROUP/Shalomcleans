@@ -20,6 +20,8 @@ const areas = [
   "Acworth",
   "Woodstock",
   "Mableton",
+  "Dunwoody",
+  "Sandy Springs"
 ]
 
 export const ShalomDifference = () => {
