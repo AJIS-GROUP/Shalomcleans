@@ -11,15 +11,15 @@ type Post = {
 
 const posts: Post[] = [
   {
-    label: "Deep Cleans",
+    label: "Deep Clean",
     gradient: "from-amber-500/30 via-orange-500/20 to-rose-500/30",
   },
   {
-    label: "Move-Out Cleans",
+    label: "Move-Out Clean",
     gradient: "from-emerald-500/30 via-teal-500/20 to-cyan-500/30",
   },
   {
-    label: "Before & Afters",
+    label: "Before & After",
     gradient: "from-violet-500/30 via-fuchsia-500/20 to-pink-500/30",
   },
 ]
