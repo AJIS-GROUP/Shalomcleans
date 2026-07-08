@@ -5,6 +5,13 @@ import { tanstackConfig } from '@tanstack/eslint-config'
 export default [
   ...tanstackConfig,
   {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
     rules: {
       'import/no-cycle': 'off',
       'import/order': 'off',
@@ -17,3 +24,4 @@ export default [
     ignores: ['eslint.config.js', 'prettier.config.js'],
   },
 ]
+
